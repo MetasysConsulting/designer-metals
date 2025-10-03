@@ -157,14 +157,12 @@ export default function YTDChart({ filters }: { filters: any }) {
   }
 
   return (
-    <div className="w-full">
-      <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-        <ReactECharts 
-          option={option} 
-          style={{ height: '400px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
-        />
-      </div>
+    <div className="w-full h-full">
+      <ReactECharts 
+        option={option} 
+        style={{ height: '100%', width: '100%' }}
+        opts={{ renderer: 'canvas' }}
+      />
     </div>
   )
 }

@@ -95,42 +95,42 @@ export default function FilterBar({ onFiltersChange }: { onFiltersChange: (filte
   }
 
   return (
-    <div className="flex flex-wrap gap-4 mb-6">
+    <div className="flex items-center gap-8">
       <div className="flex flex-col">
-        <label className="text-sm font-medium text-gray-700 mb-1">YEAR</label>
+        <label className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">Year</label>
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 text-base font-medium shadow-sm hover:border-gray-400 transition-all duration-150 min-w-[140px] relative z-50"
         >
           {options.years.map(year => (
-            <option key={year} value={year} className="text-gray-900">{year}</option>
+            <option key={year} value={year} className="text-gray-800 font-medium">{year}</option>
           ))}
         </select>
       </div>
 
       <div className="flex flex-col">
-        <label className="text-sm font-medium text-gray-700 mb-1">CUSTOMER</label>
+        <label className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">Customer</label>
         <select
           value={selectedCustomer}
           onChange={(e) => setSelectedCustomer(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 text-base font-medium shadow-sm hover:border-gray-400 transition-all duration-150 min-w-[160px] relative z-50"
         >
           {options.customers.map(customer => (
-            <option key={customer} value={customer} className="text-gray-900">{customer}</option>
+            <option key={customer} value={customer} className="text-gray-800 font-medium">{customer}</option>
           ))}
         </select>
       </div>
 
       <div className="flex flex-col">
-        <label className="text-sm font-medium text-gray-700 mb-1">CATEGORY</label>
+        <label className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">Category</label>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 text-base font-medium shadow-sm hover:border-gray-400 transition-all duration-150 min-w-[160px] relative z-50"
         >
           {options.categories.map(category => (
-            <option key={category} value={category} className="text-gray-900">{category}</option>
+            <option key={category} value={category} className="text-gray-800 font-medium">{category}</option>
           ))}
         </select>
       </div>

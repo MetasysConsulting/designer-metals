@@ -61,9 +61,9 @@ export default function SalesChart({ filters }: { filters: any }) {
       }
     },
     grid: {
-      left: '3%',
+      left: '8%',
       right: '4%',
-      bottom: '3%',
+      bottom: '8%',
       top: '15%',
       containLabel: true
     },
@@ -84,16 +84,19 @@ export default function SalesChart({ filters }: { filters: any }) {
       type: 'value',
       name: 'AMOUNT($)',
       nameLocation: 'middle',
-      nameGap: 50,
+      nameGap: 60,
       nameTextStyle: {
         color: '#6b7280',
-        fontSize: 12
+        fontSize: 14,
+        fontWeight: 'bold'
       },
       axisLabel: {
         formatter: function(value: number) {
           return `${(value / 1000000).toFixed(0)}M`
         },
-        color: '#6b7280'
+        color: '#6b7280',
+        fontSize: 12,
+        margin: 8
       },
       axisLine: {
         lineStyle: {
@@ -119,8 +122,8 @@ export default function SalesChart({ filters }: { filters: any }) {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#3b82f6' },
-              { offset: 1, color: '#1d4ed8' }
+              { offset: 0, color: '#fbbf24' },
+              { offset: 1, color: '#f59e0b' }
             ]
           }
         },
@@ -135,7 +138,7 @@ export default function SalesChart({ filters }: { filters: any }) {
         },
         emphasis: {
           itemStyle: {
-            color: '#1e40af'
+            color: '#d97706'
           }
         }
       }
@@ -159,14 +162,12 @@ export default function SalesChart({ filters }: { filters: any }) {
   }
 
   return (
-    <div className="w-full">
-      <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-        <ReactECharts 
-          option={option} 
-          style={{ height: '500px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
-        />
-      </div>
+    <div className="w-full h-full">
+      <ReactECharts 
+        option={option} 
+        style={{ height: '100%', width: '100%' }}
+        opts={{ renderer: 'canvas' }}
+      />
     </div>
   )
 }

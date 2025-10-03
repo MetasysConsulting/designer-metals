@@ -2,15 +2,12 @@
 
 import { useState, useCallback } from 'react'
 import html2canvas from 'html2canvas'
-import SalesChart from '@/components/SalesChart'
-import CategoryChart from '@/components/CategoryChart'
-import YTDChart from '@/components/YTDChart'
-import KPICards from '@/components/KPICards'
 import FilterBar from '@/components/FilterBar'
-import SalesDetailsTable from '@/components/SalesDetailsTable'
-import Header from '@/components/Header'
+import CategoryBarChart from '@/components/CategoryBarChart'
+import CategoryLineChart from '@/components/CategoryLineChart'
+import CategoryDetailsTable from '@/components/CategoryDetailsTable'
 
-export default function SalesOverview() {
+export default function SalesCategoryDetails() {
   const [filters, setFilters] = useState({
     year: 'All',
     customer: 'All',
@@ -19,10 +16,9 @@ export default function SalesOverview() {
 
   const handleFiltersChange = useCallback((newFilters: any) => {
     setFilters(newFilters)
-    console.log('Filters changed:', newFilters)
   }, [])
 
-
+  // Export functions
   const exportToImage = async () => {
     console.log('Image export started')
     
@@ -59,7 +55,7 @@ export default function SalesOverview() {
 
       // Convert to image and download
       const link = document.createElement('a')
-      link.download = `Designer-Metals-Sales-Dashboard-${new Date().toISOString().split('T')[0]}.png`
+      link.download = `Designer-Metals-Sales-Category-Details-${new Date().toISOString().split('T')[0]}.png`
       link.href = canvas.toDataURL('image/png', 0.9)
       link.click()
       
@@ -78,11 +74,11 @@ export default function SalesOverview() {
       day: 'numeric'
     })
     
-    const subject = encodeURIComponent('Designer Metals - Sales Dashboard Report')
+    const subject = encodeURIComponent('Designer Metals - Sales by Category Details Report')
     const body = encodeURIComponent(`
 Dear Team,
 
-Please find the Sales Dashboard Report for Designer Metals.
+Please find the Sales by Category Details Report for Designer Metals.
 
 Report Details:
 • Generated: ${currentDate}
@@ -91,13 +87,14 @@ Report Details:
   - Customer: ${filters.customer}
   - Category: ${filters.category}
 
-This report contains comprehensive sales analytics including:
-• Monthly sales trends and analysis
-• Year-to-date performance metrics
-• Detailed transaction data
-• Customer performance insights
+This comprehensive report includes:
+• Category performance cards
+• Sales by category bar chart
+• Amount over time line chart
+• Detailed monthly breakdown table
+• Category-specific insights
 
-The dashboard provides real-time data from our Supabase database and includes interactive charts and detailed sales tables.
+The dashboard provides real-time data from our Supabase database with detailed category analysis.
 
 For any questions or additional analysis, please contact the Analytics Team.
 
@@ -108,19 +105,15 @@ Designer Metals Analytics Team
     window.open(`mailto:?subject=${subject}&body=${body}`)
   }
 
+  // Category cards data
+  const categories = [
+    'Carports', 'Carports Down Payment', 'Coil', 'Contractor', 
+    'Customers', 'Employee Appreciation', 'LuxGuard', 'Shed', 
+    'Shipped to', 'Standard', 'Wholesale'
+  ]
+
   return (
-    <>
-      <style jsx>{`
-        @media print {
-          .export-buttons {
-            display: none !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-      <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50">
       {/* Header with Logo, Filters, and Export Options */}
       <div className="w-full bg-gray-50 py-6 px-8">
         <div className="flex items-center justify-between">
@@ -180,45 +173,60 @@ Designer Metals Analytics Team
       <div className="p-8">
         {/* Page Title */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Sales Dashboard Overview</h1>
-          <p className="text-lg text-gray-600 mt-2">Comprehensive sales analytics and performance insights</p>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Sales by Category Details</h1>
+          <p className="text-lg text-gray-600 mt-2">Comprehensive category performance analysis and detailed insights</p>
+        </div>
+
+        {/* Category Cards - Horizontal Train */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Category Overview</h2>
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {categories.map((category) => (
+              <div
+                key={category}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-3 text-center hover:shadow-md transition-shadow cursor-pointer flex-shrink-0 whitespace-nowrap"
+              >
+                <div className="text-sm font-medium text-gray-800">
+                  {category}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-          {/* Monthly Sales Chart */}
+          {/* Horizontal Bar Chart - Left side */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales - Monthly View</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Sales by Category</h2>
               <div className="h-80 w-full">
-                <SalesChart filters={filters} />
+                <CategoryBarChart filters={filters} />
               </div>
             </div>
           </div>
           
-          {/* YTD Sales Chart */}
+          {/* Line Chart - Right side */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Amount Over Time</h2>
               <div className="h-80 w-full">
-                <YTDChart filters={filters} />
+                <CategoryLineChart filters={filters} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Sales Details Table */}
+        {/* Detailed Data Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Sales Performance Details</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Category Performance Details</h2>
             <div className="overflow-x-auto">
-              <SalesDetailsTable filters={filters} />
+              <CategoryDetailsTable filters={filters} />
             </div>
           </div>
         </div>
       </div>
-      
     </div>
-    </>
   )
 }

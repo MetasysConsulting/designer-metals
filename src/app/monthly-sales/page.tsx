@@ -2,15 +2,11 @@
 
 import { useState, useCallback } from 'react'
 import html2canvas from 'html2canvas'
-import SalesChart from '@/components/SalesChart'
-import CategoryChart from '@/components/CategoryChart'
-import YTDChart from '@/components/YTDChart'
-import KPICards from '@/components/KPICards'
 import FilterBar from '@/components/FilterBar'
-import SalesDetailsTable from '@/components/SalesDetailsTable'
-import Header from '@/components/Header'
+import MonthlySalesChart from '@/components/MonthlySalesChart'
+import MonthlySalesDataTable from '@/components/MonthlySalesDataTable'
 
-export default function SalesOverview() {
+export default function MonthlySales() {
   const [filters, setFilters] = useState({
     year: 'All',
     customer: 'All',
@@ -19,14 +15,12 @@ export default function SalesOverview() {
 
   const handleFiltersChange = useCallback((newFilters: any) => {
     setFilters(newFilters)
-    console.log('Filters changed:', newFilters)
   }, [])
 
-
+  // Export functions
   const exportToImage = async () => {
     console.log('Image export started')
     
-    // Use visible dashboard content
     const targetElement = document.querySelector('.min-h-screen') as HTMLElement
     if (!targetElement) {
       alert('Dashboard content not found. Please try again.')
@@ -35,7 +29,6 @@ export default function SalesOverview() {
 
     try {
       console.log('Starting html2canvas capture for image...')
-      // Use html2canvas to capture the dashboard with better settings
       const canvas = await html2canvas(targetElement, {
         scale: 1.5,
         useCORS: true,
@@ -45,7 +38,6 @@ export default function SalesOverview() {
         removeContainer: true,
         foreignObjectRendering: true,
         onclone: (clonedDoc) => {
-          // Ensure all styles are preserved in the clone
           const clonedElement = clonedDoc.querySelector('.min-h-screen') || clonedDoc.body
           if (clonedElement) {
             clonedElement.style.position = 'static'
@@ -57,9 +49,8 @@ export default function SalesOverview() {
       
       console.log('Canvas created for image, dimensions:', canvas.width, 'x', canvas.height)
 
-      // Convert to image and download
       const link = document.createElement('a')
-      link.download = `Designer-Metals-Sales-Dashboard-${new Date().toISOString().split('T')[0]}.png`
+      link.download = `Designer-Metals-Monthly-Sales-${new Date().toISOString().split('T')[0]}.png`
       link.href = canvas.toDataURL('image/png', 0.9)
       link.click()
       
@@ -78,11 +69,11 @@ export default function SalesOverview() {
       day: 'numeric'
     })
     
-    const subject = encodeURIComponent('Designer Metals - Sales Dashboard Report')
+    const subject = encodeURIComponent('Designer Metals - Monthly Sales Report')
     const body = encodeURIComponent(`
 Dear Team,
 
-Please find the Sales Dashboard Report for Designer Metals.
+Please find the Monthly Sales Report for Designer Metals.
 
 Report Details:
 • Generated: ${currentDate}
@@ -91,13 +82,13 @@ Report Details:
   - Customer: ${filters.customer}
   - Category: ${filters.category}
 
-This report contains comprehensive sales analytics including:
-• Monthly sales trends and analysis
-• Year-to-date performance metrics
-• Detailed transaction data
-• Customer performance insights
+This report contains comprehensive monthly sales analytics including:
+• Total sales by month name and year (clustered bar chart)
+• Yearly breakdown with YTD sales, total sales, and growth metrics
+• Invoice count and average revenue per invoice analysis
+• Year-over-year growth percentage tracking
 
-The dashboard provides real-time data from our Supabase database and includes interactive charts and detailed sales tables.
+The dashboard provides real-time data from our Supabase database and includes interactive charts and detailed tables.
 
 For any questions or additional analysis, please contact the Analytics Team.
 
@@ -109,18 +100,7 @@ Designer Metals Analytics Team
   }
 
   return (
-    <>
-      <style jsx>{`
-        @media print {
-          .export-buttons {
-            display: none !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-      <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50">
       {/* Header with Logo, Filters, and Export Options */}
       <div className="w-full bg-gray-50 py-6 px-8">
         <div className="flex items-center justify-between">
@@ -180,45 +160,30 @@ Designer Metals Analytics Team
       <div className="p-8">
         {/* Page Title */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Sales Dashboard Overview</h1>
-          <p className="text-lg text-gray-600 mt-2">Comprehensive sales analytics and performance insights</p>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">MONTHLY SALES</h1>
+          <p className="text-lg text-gray-600 mt-2">Total sales by month name and year analysis</p>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-          {/* Monthly Sales Chart */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales - Monthly View</h2>
-              <div className="h-80 w-full">
-                <SalesChart filters={filters} />
-              </div>
-            </div>
-          </div>
-          
-          {/* YTD Sales Chart */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales</h2>
-              <div className="h-80 w-full">
-                <YTDChart filters={filters} />
-              </div>
+        {/* Monthly Sales Chart */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
+          <div className="p-6">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Total Sales by Month Name and Year</h2>
+            <div className="h-96 w-full">
+              <MonthlySalesChart filters={filters} />
             </div>
           </div>
         </div>
 
-        {/* Sales Details Table */}
+        {/* Monthly Sales Data Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Sales Performance Details</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Monthly Sales Performance Details</h2>
             <div className="overflow-x-auto">
-              <SalesDetailsTable filters={filters} />
+              <MonthlySalesDataTable filters={filters} />
             </div>
           </div>
         </div>
       </div>
-      
     </div>
-    </>
   )
 }

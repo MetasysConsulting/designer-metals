@@ -2,6 +2,12 @@ import { supabase } from './supabase'
 import { ARINV } from '@/types/arinv'
 
 export async function fetchARINVData(): Promise<ARINV[]> {
+  // Check if Supabase is properly configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+    console.warn('Supabase not configured, returning empty data')
+    return []
+  }
+
   const { data, error } = await supabase
     .from('ARINV')
     .select('*')

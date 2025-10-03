@@ -64,15 +64,15 @@ export default function CategoryChart({ filters }: { filters: any }) {
       top: 'middle',
       textStyle: {
         color: '#6b7280',
-        fontSize: 12
+        fontSize: 11
       }
     },
     series: [
       {
         name: 'Sales by Category',
         type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['60%', '50%'],
+        radius: ['35%', '65%'],
+        center: ['65%', '50%'],
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 8,
@@ -131,14 +131,12 @@ export default function CategoryChart({ filters }: { filters: any }) {
   }
 
   return (
-    <div className="w-full">
-      <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-        <ReactECharts 
-          option={option} 
-          style={{ height: '500px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
-        />
-      </div>
+    <div className="w-full h-full">
+      <ReactECharts 
+        option={option} 
+        style={{ height: '100%', width: '100%' }}
+        opts={{ renderer: 'canvas' }}
+      />
     </div>
   )
 }

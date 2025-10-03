@@ -2,15 +2,10 @@
 
 import { useState, useCallback } from 'react'
 import html2canvas from 'html2canvas'
-import SalesChart from '@/components/SalesChart'
-import CategoryChart from '@/components/CategoryChart'
-import YTDChart from '@/components/YTDChart'
-import KPICards from '@/components/KPICards'
 import FilterBar from '@/components/FilterBar'
-import SalesDetailsTable from '@/components/SalesDetailsTable'
-import Header from '@/components/Header'
+import IndividualSalesChart from '@/components/IndividualSalesChart'
 
-export default function SalesOverview() {
+export default function IndividualSales() {
   const [filters, setFilters] = useState({
     year: 'All',
     customer: 'All',
@@ -19,14 +14,12 @@ export default function SalesOverview() {
 
   const handleFiltersChange = useCallback((newFilters: any) => {
     setFilters(newFilters)
-    console.log('Filters changed:', newFilters)
   }, [])
 
-
+  // Export functions
   const exportToImage = async () => {
     console.log('Image export started')
     
-    // Use visible dashboard content
     const targetElement = document.querySelector('.min-h-screen') as HTMLElement
     if (!targetElement) {
       alert('Dashboard content not found. Please try again.')
@@ -35,7 +28,6 @@ export default function SalesOverview() {
 
     try {
       console.log('Starting html2canvas capture for image...')
-      // Use html2canvas to capture the dashboard with better settings
       const canvas = await html2canvas(targetElement, {
         scale: 1.5,
         useCORS: true,
@@ -45,7 +37,6 @@ export default function SalesOverview() {
         removeContainer: true,
         foreignObjectRendering: true,
         onclone: (clonedDoc) => {
-          // Ensure all styles are preserved in the clone
           const clonedElement = clonedDoc.querySelector('.min-h-screen') || clonedDoc.body
           if (clonedElement) {
             clonedElement.style.position = 'static'
@@ -57,9 +48,8 @@ export default function SalesOverview() {
       
       console.log('Canvas created for image, dimensions:', canvas.width, 'x', canvas.height)
 
-      // Convert to image and download
       const link = document.createElement('a')
-      link.download = `Designer-Metals-Sales-Dashboard-${new Date().toISOString().split('T')[0]}.png`
+      link.download = `Designer-Metals-Individual-Sales-${new Date().toISOString().split('T')[0]}.png`
       link.href = canvas.toDataURL('image/png', 0.9)
       link.click()
       
@@ -78,11 +68,11 @@ export default function SalesOverview() {
       day: 'numeric'
     })
     
-    const subject = encodeURIComponent('Designer Metals - Sales Dashboard Report')
+    const subject = encodeURIComponent('Designer Metals - Individual Sales Report')
     const body = encodeURIComponent(`
 Dear Team,
 
-Please find the Sales Dashboard Report for Designer Metals.
+Please find the Individual Sales Report for Designer Metals.
 
 Report Details:
 • Generated: ${currentDate}
@@ -91,13 +81,13 @@ Report Details:
   - Customer: ${filters.customer}
   - Category: ${filters.category}
 
-This report contains comprehensive sales analytics including:
-• Monthly sales trends and analysis
-• Year-to-date performance metrics
-• Detailed transaction data
-• Customer performance insights
+This report contains comprehensive individual sales analytics including:
+• Carport Sales by Year
+• Coil Sales by Year
+• Panel Sales by Year
+• LuxGuard Sales by Year
 
-The dashboard provides real-time data from our Supabase database and includes interactive charts and detailed sales tables.
+The dashboard provides real-time data from our Supabase database and includes interactive charts for each product category.
 
 For any questions or additional analysis, please contact the Analytics Team.
 
@@ -109,18 +99,7 @@ Designer Metals Analytics Team
   }
 
   return (
-    <>
-      <style jsx>{`
-        @media print {
-          .export-buttons {
-            display: none !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-      <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50">
       {/* Header with Logo, Filters, and Export Options */}
       <div className="w-full bg-gray-50 py-6 px-8">
         <div className="flex items-center justify-between">
@@ -180,45 +159,91 @@ Designer Metals Analytics Team
       <div className="p-8">
         {/* Page Title */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Sales Dashboard Overview</h1>
-          <p className="text-lg text-gray-600 mt-2">Comprehensive sales analytics and performance insights</p>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">INDIVIDUAL SALES</h1>
+          <p className="text-lg text-gray-600 mt-2">Sales by year for different product categories</p>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-          {/* Monthly Sales Chart */}
+        {/* 2x2 Grid of Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Carport Sales by Year */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales - Monthly View</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Carport Sales by Year</h2>
               <div className="h-80 w-full">
-                <SalesChart filters={filters} />
+                <IndividualSalesChart 
+                  category="Carport" 
+                  filters={filters}
+                  data={[
+                    { year: '2022', sales: 0.01 },
+                    { year: '2023', sales: 0.02 },
+                    { year: '2024', sales: 1.38 },
+                    { year: '2025', sales: 1.79 }
+                  ]}
+                />
               </div>
             </div>
           </div>
-          
-          {/* YTD Sales Chart */}
+
+          {/* Coil Sales by Year */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Coil Sales by Year</h2>
               <div className="h-80 w-full">
-                <YTDChart filters={filters} />
+                <IndividualSalesChart 
+                  category="Coil" 
+                  filters={filters}
+                  data={[
+                    { year: '2021', sales: 0.0 },
+                    { year: '2022', sales: 0.1 },
+                    { year: '2023', sales: 2.7 },
+                    { year: '2024', sales: 3.9 },
+                    { year: '2025', sales: 5.5 }
+                  ]}
+                />
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Sales Details Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Sales Performance Details</h2>
-            <div className="overflow-x-auto">
-              <SalesDetailsTable filters={filters} />
+          {/* Panel Sales by Year */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Panel Sales by Year</h2>
+              <div className="h-80 w-full">
+                <IndividualSalesChart 
+                  category="Panel" 
+                  filters={filters}
+                  data={[
+                    { year: '2020', sales: 1.3 },
+                    { year: '2022', sales: 2.0 },
+                    { year: '2023', sales: 2.3 },
+                    { year: '2024', sales: 3.3 },
+                    { year: '2025', sales: 3.9 }
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* LuxGuard Sales by Year */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">LuxGuard Sales by Year</h2>
+              <div className="h-80 w-full">
+                <IndividualSalesChart 
+                  category="LuxGuard" 
+                  filters={filters}
+                  data={[
+                    { year: '2022', sales: 0.03 },
+                    { year: '2023', sales: 0.11 },
+                    { year: '2024', sales: 0.61 },
+                    { year: '2025', sales: 0.56 }
+                  ]}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-      
     </div>
-    </>
   )
 }
