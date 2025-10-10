@@ -1,154 +1,182 @@
 'use client'
 
-import SalesChart from '@/components/SalesChart'
-import YTDChart from '@/components/YTDChart'
-import SalesDetailsTable from '@/components/SalesDetailsTable'
+import { forwardRef } from 'react'
+import SalesChart from './SalesChart'
+import YTDChart from './YTDChart'
+import SalesDetailsTable from './SalesDetailsTable'
 
 interface PrintableDashboardProps {
   filters: any
 }
 
-export default function PrintableDashboard({ filters }: PrintableDashboardProps) {
-  return (
-    <div className="print-dashboard" style={{
-      width: '100%',
-      maxWidth: '8.5in',
-      margin: '0 auto',
-      padding: '0.5in',
-      backgroundColor: 'white',
-      color: '#000',
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '12px',
-      lineHeight: '1.4'
-    }}>
-      {/* Header */}
-      <div style={{
-        textAlign: 'center',
-        marginBottom: '20px',
-        borderBottom: '2px solid #333',
-        paddingBottom: '15px'
-      }}>
-        <img 
-          src="/Designer Metals Logo.png" 
-          alt="Designer Metals Logo" 
-          style={{
-            height: '60px',
-            marginBottom: '10px'
-          }}
-        />
-        <h1 style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          margin: '0 0 5px 0',
-          color: '#000'
-        }}>
-          Sales Dashboard Report
-        </h1>
-        <p style={{
-          fontSize: '14px',
-          margin: '0',
-          color: '#666'
-        }}>
-          Generated: {new Date().toLocaleDateString('en-US', {
+const PrintableDashboard = forwardRef<HTMLDivElement, PrintableDashboardProps>(
+  ({ filters }, ref) => {
+    return (
+      <div ref={ref} className="printable-dashboard" style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '210mm', minHeight: '297mm' }}>
+        <style jsx>{`
+          .printable-dashboard {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #1f2937;
+            background: white;
+            padding: 20px;
+          }
+          
+          .print-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 20px;
+          }
+          
+          .print-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 8px;
+          }
+          
+          .print-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            margin: 4px 0;
+          }
+          
+          .filters-info {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3b82f6;
+          }
+          
+          .charts-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin: 30px 0;
+          }
+          
+          .chart-container {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          .chart-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1f2937;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+          }
+          
+          .chart-content {
+            height: 400px;
+            width: 100%;
+          }
+          
+          .table-container {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          .table-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1f2937;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+          }
+          
+          .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+          }
+          
+          @media print {
+            .printable-dashboard {
+              padding: 0;
+              margin: 0;
+            }
+            
+            .chart-container,
+            .table-container {
+              page-break-inside: avoid;
+              break-inside: avoid;
+              margin-bottom: 20px;
+            }
+            
+            .charts-section {
+              display: block;
+            }
+            
+            .chart-content {
+              height: 300px;
+            }
+          }
+        `}</style>
+        
+        <div className="print-header">
+          <div className="print-title">Sales Dashboard Overview</div>
+          <div className="print-subtitle">Designer Metals - Sales Analytics Report</div>
+          <div className="print-subtitle">Generated: {new Date().toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
-          })}
-        </p>
-        <div style={{
-          fontSize: '12px',
-          marginTop: '8px',
-          color: '#666'
-        }}>
-          Filters: Year: {filters.year} | Customer: {filters.customer} | Category: {filters.category}
+          })}</div>
         </div>
-      </div>
-
-      {/* Charts Section - Single Column Layout */}
-      <div style={{ marginBottom: '20px' }}>
-        {/* Monthly Sales Chart */}
-        <div style={{
-          backgroundColor: '#fff',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          marginBottom: '15px',
-          padding: '15px',
-          pageBreakInside: 'avoid'
-        }}>
-          <h2 style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            margin: '0 0 10px 0',
-            color: '#000'
-          }}>
-            Total Sales - Monthly View
-          </h2>
-          <div style={{
-            height: '300px',
-            width: '100%'
-          }}>
-            <SalesChart filters={filters} />
+        
+        <div className="filters-info">
+          <strong>Report Filters Applied:</strong><br />
+          • Year: {filters.year}<br />
+          • Customer: {filters.customer}<br />
+          • Category: {filters.category}
+        </div>
+        
+        <div className="charts-section">
+          <div className="chart-container">
+            <div className="chart-title">Total Sales - Monthly View</div>
+            <div className="chart-content">
+              <SalesChart filters={filters} />
+            </div>
+          </div>
+          
+          <div className="chart-container">
+            <div className="chart-title">Total Sales - Year to Date</div>
+            <div className="chart-content">
+              <YTDChart filters={filters} />
+            </div>
           </div>
         </div>
-
-        {/* YTD Sales Chart */}
-        <div style={{
-          backgroundColor: '#fff',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          marginBottom: '15px',
-          padding: '15px',
-          pageBreakInside: 'avoid'
-        }}>
-          <h2 style={{
-            fontSize: '18px',
-            fontWeight: 'bold',
-            margin: '0 0 10px 0',
-            color: '#000'
-          }}>
-            Total Sales
-          </h2>
-          <div style={{
-            height: '300px',
-            width: '100%'
-          }}>
-            <YTDChart filters={filters} />
-          </div>
-        </div>
-      </div>
-
-      {/* Sales Details Table */}
-      <div style={{
-        backgroundColor: '#fff',
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        padding: '15px',
-        pageBreakInside: 'avoid'
-      }}>
-        <h2 style={{
-          fontSize: '18px',
-          fontWeight: 'bold',
-          margin: '0 0 10px 0',
-          color: '#000'
-        }}>
-          Sales Performance Details
-        </h2>
-        <div style={{ overflow: 'visible' }}>
+        
+        <div className="table-container">
+          <div className="table-title">Sales Performance Details</div>
           <SalesDetailsTable filters={filters} />
         </div>
+        
+        <div className="footer">
+          <p>This report was generated automatically by the Designer Metals Sales Dashboard System.</p>
+          <p>For questions or additional information, please contact the Analytics Team.</p>
+        </div>
       </div>
+    )
+  }
+)
 
-      {/* Footer */}
-      <div style={{
-        marginTop: '20px',
-        paddingTop: '15px',
-        borderTop: '1px solid #ddd',
-        textAlign: 'center',
-        fontSize: '10px',
-        color: '#666'
-      }}>
-        Designer Metals - Sales Analytics Dashboard
-      </div>
-    </div>
-  )
-}
+PrintableDashboard.displayName = 'PrintableDashboard'
+
+export default PrintableDashboard
