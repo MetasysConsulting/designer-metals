@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
+import { useReactToPrint } from 'react-to-print'
 import html2canvas from 'html2canvas'
 import SalesChart from '@/components/SalesChart'
 import CategoryChart from '@/components/CategoryChart'
@@ -17,10 +18,34 @@ export default function SalesOverview() {
     category: 'All'
   })
 
+  const printRef = useRef<HTMLDivElement>(null)
+
   const handleFiltersChange = useCallback((newFilters: any) => {
     setFilters(newFilters)
     console.log('Filters changed:', newFilters)
   }, [])
+
+  // Professional print handler using react-to-print
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `Designer-Metals-Sales-Dashboard-${new Date().toISOString().split('T')[0]}`,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 0.5in;
+      }
+      @media print {
+        body { -webkit-print-color-adjust: exact; }
+        .chart-container, .table-container { 
+          page-break-inside: avoid; 
+          break-inside: avoid;
+        }
+        .charts-section {
+          display: block !important;
+        }
+      }
+    `
+  })
 
 
   const exportToImage = async () => {
@@ -120,7 +145,7 @@ Designer Metals Analytics Team
           }
         }
       `}</style>
-      <div className="w-full min-h-screen bg-gray-50">
+      <div className="w-full min-h-screen bg-gray-50" ref={printRef}>
       {/* Header with Logo, Filters, and Export Options */}
       <div className="w-full bg-gray-50 py-6 px-8">
         <div className="flex items-center justify-between">
@@ -138,9 +163,9 @@ Designer Metals Analytics Team
             <FilterBar onFiltersChange={handleFiltersChange} />
             
             {/* Export Options */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 no-print">
               <button
-                onClick={() => window.print()}
+                onClick={handlePrint}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 text-sm"
                 title="Print Report"
               >
@@ -185,12 +210,12 @@ Designer Metals Analytics Team
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8 charts-section">
           {/* Monthly Sales Chart */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales - Monthly View</h2>
-              <div className="h-80 w-full">
+              <div className="h-80 w-full chart-container">
                 <SalesChart filters={filters} />
               </div>
             </div>
@@ -200,7 +225,7 @@ Designer Metals Analytics Team
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales</h2>
-              <div className="h-80 w-full">
+              <div className="h-80 w-full chart-container">
                 <YTDChart filters={filters} />
               </div>
             </div>
@@ -208,7 +233,7 @@ Designer Metals Analytics Team
         </div>
 
         {/* Sales Details Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 table-container">
           <div className="p-6">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Sales Performance Details</h2>
             <div className="overflow-x-auto">
