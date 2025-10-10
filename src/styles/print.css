@@ -1,0 +1,199 @@
+/* Print-specific styles for Designer Metals Dashboard */
+
+@media print {
+  /* Ensure colors are preserved in print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide non-printable elements */
+  .export-buttons,
+  .no-print,
+  button[onclick*="export"],
+  .bottom-navigation,
+  nav,
+  .navigation {
+    display: none !important;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 0.5in;
+  }
+
+  /* Body adjustments */
+  body {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    color: #000 !important;
+    background: white !important;
+  }
+
+  /* Chart containers and ECharts */
+  .chart-container,
+  .echarts-for-react,
+  [class*="chart"] {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 300px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: visible !important;
+  }
+
+  /* Chart canvas elements */
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 300px !important;
+    width: 100% !important;
+  }
+
+  /* Grid layouts - convert to single column for print */
+  .grid {
+    display: block !important;
+  }
+
+  .grid > div,
+  .grid > * {
+    width: 100% !important;
+    margin-bottom: 15px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    display: block !important;
+  }
+
+  /* Flex layouts - convert to block for print */
+  .flex {
+    display: block !important;
+  }
+
+  .flex > * {
+    display: block !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Card containers */
+  .bg-white,
+  .rounded-lg,
+  .shadow-sm,
+  .border {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    border-radius: 4px !important;
+    margin-bottom: 15px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Tables */
+  table {
+    width: 100% !important;
+    font-size: 10px !important;
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    padding: 4px 6px !important;
+    border: 1px solid #ddd !important;
+    font-size: 10px !important;
+  }
+
+  th {
+    background-color: #f5f5f5 !important;
+    font-weight: bold !important;
+  }
+
+  /* Headers and titles */
+  h1, h2, h3, h4, h5, h6 {
+    color: #000 !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  h1 {
+    font-size: 18px !important;
+    margin-bottom: 10px !important;
+  }
+
+  h2 {
+    font-size: 16px !important;
+    margin-bottom: 8px !important;
+  }
+
+  h3 {
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Logo and header adjustments */
+  img {
+    max-height: 60px !important;
+    width: auto !important;
+  }
+
+  /* Padding and margins */
+  .p-6, .p-8 {
+    padding: 10px !important;
+  }
+
+  .py-6, .py-8 {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .px-6, .px-8 {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .mb-8, .mb-6 {
+    margin-bottom: 15px !important;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always !important;
+  }
+
+  .page-break-after {
+    page-break-after: always !important;
+  }
+
+  .page-break-inside-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* KPI Cards */
+  .kpi-card,
+  [class*="kpi"] {
+    display: inline-block !important;
+    width: 48% !important;
+    margin: 1% !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Ensure text is readable */
+  .text-gray-600,
+  .text-gray-500,
+  .text-gray-400 {
+    color: #333 !important;
+  }
+
+  /* Remove shadows and effects */
+  .shadow-sm,
+  .shadow,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  /* Ensure proper spacing between sections */
+  .min-h-screen > * {
+    margin-bottom: 20px !important;
+  }
+}
