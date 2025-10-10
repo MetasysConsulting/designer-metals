@@ -27,7 +27,7 @@ export default function SalesOverview() {
 
   // Professional print handler using react-to-print
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
     documentTitle: `Designer-Metals-Sales-Dashboard-${new Date().toISOString().split('T')[0]}`,
     pageStyle: `
       @page {
