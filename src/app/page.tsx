@@ -118,75 +118,6 @@ Designer Metals Analytics Team
           .no-print {
             display: none !important;
           }
-          
-          /* Print-specific styles for charts and layout */
-          body {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          
-          /* Ensure charts fit properly on page */
-          .chart-container, .echarts-for-react {
-            width: 100% !important;
-            height: auto !important;
-            max-height: 300px !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          
-          /* Chart canvas sizing for print */
-          canvas {
-            max-width: 100% !important;
-            height: auto !important;
-            max-height: 300px !important;
-          }
-          
-          /* Grid layout adjustments for print */
-          .grid {
-            display: block !important;
-          }
-          
-          .grid > div {
-            width: 100% !important;
-            margin-bottom: 20px !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          
-          /* Table adjustments */
-          .overflow-x-auto {
-            overflow: visible !important;
-          }
-          
-          table {
-            width: 100% !important;
-            font-size: 12px !important;
-          }
-          
-          /* Ensure proper spacing */
-          .p-6, .p-8 {
-            padding: 15px !important;
-          }
-          
-          /* Header adjustments */
-          .h-24 {
-            height: 60px !important;
-          }
-          
-          /* Page breaks */
-          .page-break-before {
-            page-break-before: always !important;
-          }
-          
-          .page-break-after {
-            page-break-after: always !important;
-          }
-          
-          .page-break-inside-avoid {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
         }
       `}</style>
       <div className="w-full min-h-screen bg-gray-50">
@@ -256,20 +187,20 @@ Designer Metals Analytics Team
         {/* Charts Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
           {/* Monthly Sales Chart */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden page-break-inside-avoid">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales - Monthly View</h2>
-              <div className="h-80 w-full chart-container">
+              <div className="h-80 w-full">
                 <SalesChart filters={filters} />
               </div>
             </div>
           </div>
           
           {/* YTD Sales Chart */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden page-break-inside-avoid">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales</h2>
-              <div className="h-80 w-full chart-container">
+              <div className="h-80 w-full">
                 <YTDChart filters={filters} />
               </div>
             </div>
@@ -277,7 +208,7 @@ Designer Metals Analytics Team
         </div>
 
         {/* Sales Details Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 page-break-inside-avoid">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Sales Performance Details</h2>
             <div className="overflow-x-auto">

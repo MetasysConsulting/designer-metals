@@ -44,10 +44,6 @@ export default function SalesChart({ filters }: { filters: any }) {
         color: '#1f2937'
       }
     },
-    // Print-friendly configuration
-    animation: false,
-    responsive: true,
-    maintainAspectRatio: false,
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -166,14 +162,11 @@ export default function SalesChart({ filters }: { filters: any }) {
   }
 
   return (
-    <div className="w-full h-full chart-container">
+    <div className="w-full h-full">
       <ReactECharts 
         option={option} 
         style={{ height: '100%', width: '100%' }}
-        opts={{ 
-          renderer: 'canvas',
-          useDirtyRect: false
-        }}
+        opts={{ renderer: 'canvas' }}
       />
     </div>
   )
