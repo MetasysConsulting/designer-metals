@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import html2canvas from 'html2canvas'
+import { printDashboard as printDashboardUtil } from '@/utils/printDashboard'
 import FilterBar from '@/components/FilterBar'
 import YTDChart from '@/components/YTDChart'
 import YTDKPICards from '@/components/YTDKPICards'
@@ -17,6 +18,10 @@ export default function YTDPage() {
   const handleFiltersChange = useCallback((newFilters: any) => {
     setFilters(newFilters)
   }, [])
+
+  // Print function
+  const printDashboard = () => printDashboardUtil('Designer Metals YTD Sales')
+
 
   // Export functions
   const exportToImage = async () => {
@@ -101,7 +106,217 @@ Designer Metals Analytics Team
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50">
+    <>
+      <style jsx>{`
+        @media print {
+          @page {
+            size: A4 landscape;
+            margin: 0.3in;
+          }
+          
+          body {
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            transform: rotate(0deg);
+            width: 100%;
+            height: 100vh;
+          }
+          
+          html {
+            width: 100%;
+            height: 100%;
+          }
+          
+          .export-buttons {
+            display: none !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          
+          .min-h-screen {
+            min-height: 100vh !important;
+            background: white !important;
+            padding: 0.5rem !important;
+            margin: 0 !important;
+            width: 100% !important;
+            height: 100vh !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          
+          .bg-gray-50 {
+            background: white !important;
+          }
+          
+          .bg-white {
+            background: white !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: none !important;
+          }
+          
+          .shadow-sm {
+            box-shadow: none !important;
+          }
+          
+          .rounded-lg {
+            border-radius: 0.375rem !important;
+          }
+          
+          .grid {
+            display: grid !important;
+            gap: 1rem !important;
+          }
+          
+          .grid-cols-1 {
+            grid-template-columns: 1fr !important;
+          }
+          
+          .xl\\:grid-cols-2 {
+            grid-template-columns: 1fr 1fr !important;
+          }
+          
+          /* Force landscape layout */
+          .grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 0.5rem !important;
+            width: 100% !important;
+          }
+          
+          .h-80 {
+            height: 15rem !important;
+            max-height: 15rem !important;
+          }
+          
+          .w-full {
+            width: 100% !important;
+          }
+          
+          .p-6, .p-8 {
+            padding: 0.5rem !important;
+          }
+          
+          .mb-6, .mb-8 {
+            margin-bottom: 0.5rem !important;
+          }
+          
+          .text-2xl {
+            font-size: 1.25rem !important;
+          }
+          
+          .text-4xl {
+            font-size: 1.5rem !important;
+          }
+          
+          .text-lg {
+            font-size: 0.875rem !important;
+          }
+          
+          .font-bold {
+            font-weight: 700 !important;
+          }
+          
+          .font-semibold {
+            font-weight: 600 !important;
+          }
+          
+          .text-gray-900 {
+            color: #111827 !important;
+          }
+          
+          .text-gray-800 {
+            color: #1f2937 !important;
+          }
+          
+          .text-gray-600 {
+            color: #4b5563 !important;
+          }
+          
+          .border-gray-200 {
+            border-color: #e5e7eb !important;
+          }
+          
+          /* Ensure charts are visible in print */
+          .echarts-for-react {
+            width: 100% !important;
+            height: 100% !important;
+          }
+          
+          canvas {
+            max-width: 100% !important;
+            height: auto !important;
+          }
+          
+          /* Table styles for print */
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+          }
+          
+          th, td {
+            border: 1px solid #e5e7eb !important;
+            padding: 0.5rem !important;
+            text-align: left !important;
+          }
+          
+          th {
+            background-color: #f9fafb !important;
+            font-weight: 600 !important;
+          }
+          
+          /* Ensure all content fits on one page */
+          .overflow-x-auto {
+            overflow: visible !important;
+          }
+          
+          .max-h-96 {
+            max-height: none !important;
+          }
+          
+          .overflow-y-auto {
+            overflow: visible !important;
+          }
+          
+          /* KPI Cards print styles */
+          .kpi-card {
+            background: white !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: none !important;
+          }
+          
+          /* Chart containers */
+          .chart-container {
+            width: 100% !important;
+            height: 15rem !important;
+          }
+          
+          /* Ensure everything fits on one A4 landscape page */
+          * {
+            page-break-inside: avoid !important;
+          }
+          
+          .bg-white {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          
+          /* Ensure proper spacing */
+          .space-y-4 > * + * {
+            margin-top: 1rem !important;
+          }
+          
+          .space-y-6 > * + * {
+            margin-top: 1.5rem !important;
+          }
+          
+          .space-y-8 > * + * {
+            margin-top: 2rem !important;
+          }
+        }
+      `}</style>
+      <div className="w-full min-h-screen bg-gray-50">
       {/* Header with Logo, Filters, and Export Options */}
       <div className="w-full bg-gray-50 py-6 px-8">
         <div className="flex items-center justify-between">
@@ -121,7 +336,7 @@ Designer Metals Analytics Team
             {/* Export Options */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => window.print()}
+                onClick={() => printDashboard()}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 text-sm"
                 title="Print Report"
               >
@@ -142,16 +357,6 @@ Designer Metals Analytics Team
                 Image
               </button>
               
-              <button
-                onClick={() => emailReport()}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2 text-sm"
-                title="Email Report"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Email
-              </button>
             </div>
           </div>
         </div>
@@ -197,5 +402,6 @@ Designer Metals Analytics Team
         </div>
       </div>
     </div>
+    </>
   )
 }

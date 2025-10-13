@@ -14,16 +14,16 @@ export default function BottomNavigation() {
   const pathname = usePathname()
 
   const tabs: Tab[] = [
-    { id: 'sales-overview', label: 'Sales Overview', icon: '📊', href: '/' },
-    { id: 'sales-category', label: 'Sales By Category', icon: '📈', href: '/sales-category' },
-    { id: 'sales-category-details', label: 'Sales By Category Details', icon: '📋', href: '/sales-category-details' },
-    { id: 'ytd-sales', label: 'YTD Sales', icon: '📅', href: '/ytd-sales' },
-    { id: 'monthly-sales', label: 'Monthly Sales', icon: '📆', href: '/monthly-sales' },
-    { id: 'individual-sales', label: 'Individual Sales', icon: '👤', href: '/individual-sales' },
-    { id: 'sales-year', label: 'Sales By Year', icon: '🗓️', href: '/sales-year' },
-    { id: 'yearly-coil', label: 'Yearly Coil Sales', icon: '🔄', href: '/yearly-coil' },
-    { id: 'ytd-coil', label: 'YTD Coil Sales', icon: '⚡', href: '/ytd-coil' },
-    { id: 'year-comparison', label: 'Sales By Year Comparison', icon: '📊', href: '/year-comparison' }
+    { id: 'sales-overview', label: 'Sales Overview', icon: '', href: '/' },
+    { id: 'sales-category', label: 'Sales By Category', icon: '', href: '/sales-category' },
+    { id: 'sales-category-details', label: 'Sales By Category Details', icon: '', href: '/sales-category-details' },
+    { id: 'ytd-sales', label: 'YTD Sales', icon: '', href: '/ytd-sales' },
+    { id: 'monthly-sales', label: 'Monthly Sales', icon: '', href: '/monthly-sales' },
+    { id: 'individual-sales', label: 'Individual Sales', icon: '', href: '/individual-sales' },
+    { id: 'sales-year', label: 'Sales By Year', icon: '', href: '/sales-year' },
+    { id: 'yearly-coil', label: 'Yearly Coil Sales', icon: '', href: '/yearly-coil' },
+    { id: 'ytd-coil', label: 'YTD Coil Sales', icon: '', href: '/ytd-coil' },
+    { id: 'year-comparison', label: 'Sales By Year Comparison', icon: '', href: '/year-comparison' }
   ]
 
   return (
@@ -55,7 +55,7 @@ export default function BottomNavigation() {
                   : 'text-gray-300 hover:text-white hover:bg-gray-700'
               }`}
             >
-              <span className="text-lg">{tab.icon}</span>
+              {tab.icon && <span className="text-lg">{tab.icon}</span>}
               <span>{tab.label}</span>
             </Link>
           ))}

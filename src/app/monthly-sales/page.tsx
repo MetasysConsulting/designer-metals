@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import html2canvas from 'html2canvas'
+import { printDashboard as printUtil } from '@/utils/printDashboard'
 import FilterBar from '@/components/FilterBar'
 import MonthlySalesChart from '@/components/MonthlySalesChart'
 import MonthlySalesDataTable from '@/components/MonthlySalesDataTable'
@@ -120,7 +121,7 @@ Designer Metals Analytics Team
             {/* Export Options */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => window.print()}
+                onClick={() => printUtil('Designer Metals Monthly Sales')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 text-sm"
                 title="Print Report"
               >
