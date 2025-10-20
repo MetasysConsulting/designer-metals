@@ -29,7 +29,7 @@ export default function BottomNavigation() {
   }, [])
 
   const tabs: Tab[] = [
-    { id: 'sales-overview', label: 'Sales Overview', icon: '', href: '/' },
+    { id: 'sales-overview', label: 'Sales Overview', icon: '', href: '/sales-overview' },
     { id: 'sales-category', label: 'Sales By Category', icon: '', href: '/sales-category' },
     { id: 'sales-category-details', label: 'Sales By Category Details', icon: '', href: '/sales-category-details' },
     { id: 'ytd-sales', label: 'YTD Sales', icon: '', href: '/ytd-sales' },

@@ -9,15 +9,71 @@ import YTDChart from '@/components/YTDChart'
 import KPICards from '@/components/KPICards'
 import FilterBar from '@/components/FilterBar'
 import SalesDetailsTable from '@/components/SalesDetailsTable'
-import Header from '@/components/Header'
+import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components'
 
-import { LoginLink } from '@kinde-oss/kinde-auth-nextjs/components'
+export default function SalesOverview() {
+  const [filters, setFilters] = useState({
+    year: 'All',
+    customer: 'All',
+    category: 'All'
+  })
 
-import { useSearchParams } from 'next/navigation'
+  const handleFiltersChange = useCallback((newFilters: any) => {
+    setFilters(newFilters)
+    console.log('Filters changed:', newFilters)
+  }, [])
 
-export default function LandingHome() {
+  const printDashboard = () => printDashboardUtil('Designer Metals Dashboard')
 
+  const exportToImage = async () => {
+    try {
+      // Hide buttons temporarily
+      const buttons = document.querySelectorAll('button')
+      buttons.forEach(btn => {
+        if (btn instanceof HTMLElement) {
+          btn.style.visibility = 'hidden'
+        }
+      })
 
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Use html2canvas to capture the entire viewport (better for logo)
+      const canvas = await html2canvas(document.body, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight
+      })
+
+      // Restore buttons
+      buttons.forEach(btn => {
+        if (btn instanceof HTMLElement) {
+          btn.style.visibility = 'visible'
+        }
+      })
+
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `designer-metals-dashboard-${new Date().toISOString().split('T')[0]}.png`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          URL.revokeObjectURL(url)
+        }
+      }, 'image/png', 1.0)
+
+    } catch (error) {
+      console.error('Image export failed:', error)
+      alert('Image export failed. Please try using your browser\'s screenshot functionality (Ctrl+Shift+S or Cmd+Shift+S)')
+    }
+  }
 
   return (
     <>
@@ -230,23 +286,94 @@ export default function LandingHome() {
           }
         }
       `}</style>
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
-        <div className="max-w-xl w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          {/* Unauthorized notice */}
-          {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('unauthorized') && (
-            <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              You are signed in but not authorized yet. Please contact an administrator to be granted access.
-            </div>
-          )}
-          <div className="text-center">
-            <img src="/Designer Metals Logo.png" alt="Designer Metals" className="h-16 mx-auto mb-4" />
-            <h1 className="text-2xl font-semibold text-gray-900">Designer Metals Analytics</h1>
-            <p className="text-gray-600 mt-2">Sign in to access dashboards</p>
+      <div className="w-full min-h-screen bg-gray-50">
+      {/* Header with Logo, Filters, and Export Options */}
+      <div className="w-full bg-gray-50 py-6 px-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            {/* Designer Metals Logo */}
+            <img 
+              src="/Designer Metals Logo.png" 
+              alt="Designer Metals Logo" 
+              className="h-24 object-contain"
+            />
           </div>
-          <div className="mt-8 grid grid-cols-1 gap-3">
-            <LoginLink className="w-full px-4 py-3 bg-teal-600 text-white rounded-lg text-center hover:bg-teal-700">Sign in</LoginLink>
+          
+          <div className="flex items-center gap-8">
+            {/* Filters */}
+            <FilterBar onFiltersChange={handleFiltersChange} />
+            
+            {/* Export Options */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => printDashboard()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 text-sm"
+                title="Print Screenshot with Controls"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print
+              </button>
+              
+              <button
+                onClick={() => exportToImage()}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 text-sm"
+                title="Save as Image"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Image
+              </button>
+              
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="p-8">
+        {/* Page Title */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Sales Dashboard Overview</h1>
+          <p className="text-lg text-gray-600 mt-2">Comprehensive sales analytics and performance insights</p>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+          {/* Monthly Sales Chart */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales - Monthly View</h2>
+              <div className="h-80 w-full">
+                <SalesChart filters={filters} />
+              </div>
+            </div>
+          </div>
+          
+          {/* YTD Sales Chart */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Total Sales</h2>
+              <div className="h-80 w-full">
+                <YTDChart filters={filters} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sales Details Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Sales Performance Details</h2>
+            <div className="overflow-x-auto">
+              <SalesDetailsTable filters={filters} />
+            </div>
+          </div>
+        </div>
+      </div>
+      
     </div>
     </>
   )
