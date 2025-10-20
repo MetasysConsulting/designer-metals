@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import BottomNavigation from '@/components/BottomNavigation'
+import AuthGuard from '@/components/AuthGuard'
+import BottomNavWrapper from '@/components/BottomNavWrapper'
+import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -15,13 +17,24 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Small wrapper to conditionally show bottom nav after auth
+  function NavWrapper() {
+    const pathname = usePathname()
+    // Hide navigation on public landing page
+    if (pathname === '/') return null
+    return <BottomNavigation />
+  }
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50 pb-20">
-          {children}
-          <BottomNavigation />
-        </div>
+        <AuthGuard>
+          <div className="min-h-screen bg-gray-50 pb-20">
+            {children}
+            <Suspense>
+              <BottomNavWrapper />
+            </Suspense>
+          </div>
+        </AuthGuard>
       </body>
     </html>
   )

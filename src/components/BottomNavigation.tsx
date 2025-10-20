@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 interface Tab {
   id: string
@@ -12,6 +13,20 @@ interface Tab {
 
 export default function BottomNavigation() {
   const pathname = usePathname()
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const res = await fetch('/api/me')
+        if (res.ok) {
+          const d = await res.json()
+          setIsAdmin(d?.user?.role === 'admin')
+        }
+      } catch {}
+    }
+    run()
+  }, [])
 
   const tabs: Tab[] = [
     { id: 'sales-overview', label: 'Sales Overview', icon: '', href: '/' },
@@ -23,7 +38,9 @@ export default function BottomNavigation() {
     { id: 'sales-year', label: 'Sales By Year', icon: '', href: '/sales-year' },
     { id: 'yearly-coil', label: 'Yearly Coil Sales', icon: '', href: '/yearly-coil' },
     { id: 'ytd-coil', label: 'YTD Coil Sales', icon: '', href: '/ytd-coil' },
-    { id: 'year-comparison', label: 'Sales By Year Comparison', icon: '', href: '/year-comparison' }
+    { id: 'year-comparison', label: 'Sales By Year Comparison', icon: '', href: '/year-comparison' },
+    { id: 'customer-locations', label: 'Customer Locations', icon: '', href: '/customer-locations' },
+    ...(isAdmin ? [{ id: 'users', label: 'Users', icon: '', href: '/users' }] : [])
   ]
 
   return (
