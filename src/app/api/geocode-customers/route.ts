@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     const rows = (data || []).filter(r => r.CITY && r.STATE)
+    console.log('Found rows for geocoding:', rows.length)
 
     // Aggregate per customer with full address
     const byCustomer: Map<string, { name: string; address: string; city: string; state: string; zip: string; totalSales: number }> = new Map()
@@ -90,6 +91,8 @@ export async function POST(request: NextRequest) {
       if (existing) existing.totalSales += total
       else byCustomer.set(key, { name, address: fullAddress, city, state, zip, totalSales: total })
     }
+    
+    console.log('Aggregated customers:', byCustomer.size)
 
     const results: CustomerPoint[] = []
     const pendingToGeocode: { key: string; name: string; address: string; city: string; state: string; zip: string; totalSales: number }[] = []
@@ -123,12 +126,26 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < pendingToGeocode.length; i++) {
       const c = pendingToGeocode[i]
-      // Build full address query for precise geocoding
-      const queryParts = [c.address, c.city, c.state, c.zip, 'USA'].filter(Boolean).join(', ')
-      const geocoded = await geocodeWithNominatim(queryParts)
+      
+      // Try full address first, then fall back to city/state if that fails
+      let geocoded = null
+      let queryParts = [c.address, c.city, c.state, c.zip, 'USA'].filter(Boolean).join(', ')
+      
+      // Only try full address if we have a meaningful address
+      if (c.address && c.address.trim().length > 5) {
+        geocoded = await geocodeWithNominatim(queryParts)
+      }
+      
+      // If full address failed, try city/state/zip
+      if (!geocoded) {
+        queryParts = [c.city, c.state, c.zip, 'USA'].filter(Boolean).join(', ')
+        geocoded = await geocodeWithNominatim(queryParts)
+      }
+      
       const fallback = STATE_COORDINATES[(c.state || '').toUpperCase()]
       const finalLat = geocoded?.lat ?? fallback?.lat
       const finalLng = geocoded?.lng ?? fallback?.lng
+      
       if (typeof finalLat === 'number' && typeof finalLng === 'number') {
         results.push({ name: c.name, address: c.address, city: c.city, state: c.state, zip: c.zip, lat: finalLat, lng: finalLng, totalSales: c.totalSales })
         if (geocoded && supabaseConfigured) {
@@ -148,6 +165,7 @@ export async function POST(request: NextRequest) {
       if (i < pendingToGeocode.length - 1) await new Promise(r => setTimeout(r, 1100))
     }
 
+    console.log('Returning geocoded results:', results.length)
     return NextResponse.json(results)
   } catch (e) {
     console.error('Geocode customers API failed:', e)

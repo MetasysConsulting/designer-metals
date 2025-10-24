@@ -25,6 +25,7 @@ interface CustomerLocationData {
 
 interface CustomerPoint {
   name: string
+  address: string
   city: string
   state: string
   zip: string
@@ -166,8 +167,10 @@ export default function CustomerLocationMap({ filters }: CustomerLocationMapProp
         })
         if (res.ok) {
           const pts = await res.json()
+          console.log('Customer points fetched:', pts.length, pts)
           setCustomerPoints(pts)
         } else {
+          console.log('Failed to fetch customer points:', res.status)
           setCustomerPoints([])
         }
       } catch {
