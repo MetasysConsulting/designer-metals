@@ -134,7 +134,7 @@ Designer Metals Analytics Team
             {/* Export Options */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => printUtil('Designer Metals Category Details')}
+                onClick={() => printUtil('Designer Metals - Sales by Category Details')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 text-sm"
                 title="Print Report"
               >

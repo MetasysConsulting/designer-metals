@@ -78,7 +78,7 @@ export async function printDashboard(title: string = 'Designer Metals Dashboard'
     })
     
     // Open print window with the captured image
-    const printWindow = window.open('', '_blank')
+    const printWindow = window.open('', '_blank', 'width=800,height=600')
     if (!printWindow) {
       alert('Please allow popups to print')
       return
@@ -88,7 +88,7 @@ export async function printDashboard(title: string = 'Designer Metals Dashboard'
       <!DOCTYPE html>
       <html>
       <head>
-        <title>${title} - Print</title>
+        <title>${title}</title>
         <style>
           @page {
             size: A4 landscape;
@@ -119,6 +119,11 @@ export async function printDashboard(title: string = 'Designer Metals Dashboard'
           }
           
           @media print {
+            @page {
+              margin: 0;
+              size: A4 landscape;
+            }
+            
             body {
               margin: 0;
               padding: 0;
@@ -132,11 +137,29 @@ export async function printDashboard(title: string = 'Designer Metals Dashboard'
               object-fit: contain;
               page-break-inside: avoid;
             }
+            
+            /* Hide browser headers and footers */
+            @page {
+              margin: 0;
+              @top-left { content: ""; }
+              @top-center { content: ""; }
+              @top-right { content: ""; }
+              @bottom-left { content: ""; }
+              @bottom-center { content: ""; }
+              @bottom-right { content: ""; }
+            }
+            
+            /* Additional print styles to remove any unwanted elements */
+            * {
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
           }
         </style>
       </head>
       <body>
-        <img src="${canvas.toDataURL('image/png', 1.0)}" onload="window.print(); setTimeout(() => window.close(), 500);">
+        <img src="${canvas.toDataURL('image/png', 1.0)}" onload="setTimeout(() => { window.print(); setTimeout(() => window.close(), 1000); }, 500);">
       </body>
       </html>
     `)
