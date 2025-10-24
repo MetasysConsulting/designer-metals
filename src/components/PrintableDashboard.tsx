@@ -1,177 +1,206 @@
 'use client'
 
 import { forwardRef } from 'react'
-import SalesChart from './SalesChart'
-import YTDChart from './YTDChart'
-import SalesDetailsTable from './SalesDetailsTable'
 
 interface PrintableDashboardProps {
-  filters: any
+  children: React.ReactNode
 }
 
 const PrintableDashboard = forwardRef<HTMLDivElement, PrintableDashboardProps>(
-  ({ filters }, ref) => {
+  ({ children }, ref) => {
     return (
-      <div ref={ref} className="printable-dashboard" style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '210mm', minHeight: '297mm' }}>
+      <div ref={ref} className="printable-dashboard">
         <style jsx>{`
           .printable-dashboard {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            color: #1f2937;
             background: white;
+            color: black;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.4;
             padding: 20px;
+            max-width: 100%;
           }
           
-          .print-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 20px;
+          .printable-dashboard * {
+            box-sizing: border-box;
           }
           
-          .print-title {
-            font-size: 28px;
-            font-weight: bold;
+          .printable-dashboard h1,
+          .printable-dashboard h2,
+          .printable-dashboard h3 {
+            margin: 0 0 16px 0;
+            font-weight: 600;
+          }
+          
+          .printable-dashboard h1 {
+            font-size: 24px;
             color: #1f2937;
-            margin-bottom: 8px;
           }
           
-          .print-subtitle {
-            font-size: 16px;
-            color: #6b7280;
-            margin: 4px 0;
-          }
-          
-          .filters-info {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #3b82f6;
-          }
-          
-          .charts-section {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            margin: 30px 0;
-          }
-          
-          .chart-container {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            page-break-inside: avoid;
-            break-inside: avoid;
-          }
-          
-          .chart-title {
+          .printable-dashboard h2 {
             font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #1f2937;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 8px;
+            color: #374151;
           }
           
-          .chart-content {
-            height: 400px;
+          .printable-dashboard h3 {
+            font-size: 18px;
+            color: #4b5563;
+          }
+          
+          .printable-dashboard p {
+            margin: 0 0 12px 0;
+            color: #6b7280;
+          }
+          
+          .printable-dashboard .chart-container {
             width: 100%;
-          }
-          
-          .table-container {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 30px 0;
+            height: 300px;
+            margin: 16px 0;
             page-break-inside: avoid;
             break-inside: avoid;
           }
           
-          .table-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #1f2937;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 8px;
+          .printable-dashboard .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            object-fit: contain;
           }
           
-          .footer {
-            margin-top: 40px;
+          .printable-dashboard .grid {
+            display: grid;
+            gap: 16px;
+            margin: 16px 0;
+          }
+          
+          .printable-dashboard .grid-cols-2 {
+            grid-template-columns: 1fr 1fr;
+          }
+          
+          .printable-dashboard .bg-white {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          .printable-dashboard .text-center {
             text-align: center;
-            font-size: 12px;
-            color: #6b7280;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 20px;
           }
           
-          @media print {
-            .printable-dashboard {
-              padding: 0;
-              margin: 0;
-            }
-            
-            .chart-container,
-            .table-container {
-              page-break-inside: avoid;
-              break-inside: avoid;
-              margin-bottom: 20px;
-            }
-            
-            .charts-section {
-              display: block;
-            }
-            
-            .chart-content {
-              height: 300px;
-            }
+          .printable-dashboard .mb-4 {
+            margin-bottom: 16px;
+          }
+          
+          .printable-dashboard .mb-6 {
+            margin-bottom: 24px;
+          }
+          
+          .printable-dashboard .mb-8 {
+            margin-bottom: 32px;
+          }
+          
+          .printable-dashboard table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          .printable-dashboard th,
+          .printable-dashboard td {
+            border: 1px solid #d1d5db;
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 14px;
+          }
+          
+          .printable-dashboard th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+          }
+          
+          .printable-dashboard td {
+            color: #6b7280;
+          }
+          
+          .printable-dashboard .font-bold {
+            font-weight: 700;
+          }
+          
+          .printable-dashboard .font-semibold {
+            font-weight: 600;
+          }
+          
+          .printable-dashboard .text-gray-900 {
+            color: #111827;
+          }
+          
+          .printable-dashboard .text-gray-800 {
+            color: #1f2937;
+          }
+          
+          .printable-dashboard .text-gray-700 {
+            color: #374151;
+          }
+          
+          .printable-dashboard .text-gray-600 {
+            color: #4b5563;
+          }
+          
+          .printable-dashboard .text-gray-500 {
+            color: #6b7280;
+          }
+          
+          .printable-dashboard .text-sm {
+            font-size: 14px;
+          }
+          
+          .printable-dashboard .text-lg {
+            font-size: 18px;
+          }
+          
+          .printable-dashboard .text-xl {
+            font-size: 20px;
+          }
+          
+          .printable-dashboard .text-2xl {
+            font-size: 24px;
+          }
+          
+          .printable-dashboard .text-3xl {
+            font-size: 30px;
+          }
+          
+          .printable-dashboard .text-4xl {
+            font-size: 36px;
+          }
+          
+          /* Hide elements that shouldn't print */
+          .printable-dashboard .no-print,
+          .printable-dashboard button,
+          .printable-dashboard .export-buttons {
+            display: none !important;
+          }
+          
+          /* Ensure proper spacing */
+          .printable-dashboard .space-y-4 > * + * {
+            margin-top: 16px;
+          }
+          
+          .printable-dashboard .space-y-6 > * + * {
+            margin-top: 24px;
+          }
+          
+          .printable-dashboard .space-y-8 > * + * {
+            margin-top: 32px;
           }
         `}</style>
-        
-        <div className="print-header">
-          <div className="print-title">Sales Dashboard Overview</div>
-          <div className="print-subtitle">Designer Metals - Sales Analytics Report</div>
-          <div className="print-subtitle">Generated: {new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })}</div>
-        </div>
-        
-        <div className="filters-info">
-          <strong>Report Filters Applied:</strong><br />
-          • Year: {filters.year}<br />
-          • Customer: {filters.customer}<br />
-          • Category: {filters.category}
-        </div>
-        
-        <div className="charts-section">
-          <div className="chart-container">
-            <div className="chart-title">Total Sales - Monthly View</div>
-            <div className="chart-content">
-              <SalesChart filters={filters} />
-            </div>
-          </div>
-          
-          <div className="chart-container">
-            <div className="chart-title">Total Sales - Year to Date</div>
-            <div className="chart-content">
-              <YTDChart filters={filters} />
-            </div>
-          </div>
-        </div>
-        
-        <div className="table-container">
-          <div className="table-title">Sales Performance Details</div>
-          <SalesDetailsTable filters={filters} />
-        </div>
-        
-        <div className="footer">
-          <p>This report was generated automatically by the Designer Metals Sales Dashboard System.</p>
-          <p>For questions or additional information, please contact the Analytics Team.</p>
-        </div>
+        {children}
       </div>
     )
   }

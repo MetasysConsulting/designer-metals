@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { loadFilters } from '@/utils/filterState'
 
 interface FilterOptions {
   years: string[]
@@ -10,9 +11,10 @@ interface FilterOptions {
 }
 
 export default function FilterBar({ onFiltersChange }: { onFiltersChange: (filters: any) => void }) {
-  const [selectedYear, setSelectedYear] = useState('All')
-  const [selectedCustomer, setSelectedCustomer] = useState('All')
-  const [selectedCategory, setSelectedCategory] = useState('All')
+  const savedFilters = loadFilters()
+  const [selectedYear, setSelectedYear] = useState(savedFilters.year || 'All')
+  const [selectedCustomer, setSelectedCustomer] = useState(savedFilters.customer || 'All')
+  const [selectedCategory, setSelectedCategory] = useState(savedFilters.category || 'All')
   const [options, setOptions] = useState<FilterOptions>({
     years: [],
     customers: [],
@@ -22,6 +24,15 @@ export default function FilterBar({ onFiltersChange }: { onFiltersChange: (filte
 
   useEffect(() => {
     fetchFilterOptions()
+  }, [])
+
+  // Sync with localStorage on mount
+  useEffect(() => {
+    const savedFilters = loadFilters()
+    console.log('FilterBar - Loading saved filters:', savedFilters)
+    setSelectedYear(savedFilters.year || 'All')
+    setSelectedCustomer(savedFilters.customer || 'All')
+    setSelectedCategory(savedFilters.category || 'All')
   }, [])
 
   useEffect(() => {

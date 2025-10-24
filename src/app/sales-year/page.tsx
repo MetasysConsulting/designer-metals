@@ -1,19 +1,21 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import html2canvas from 'html2canvas'
-import { printDashboard as printUtil } from '@/utils/printDashboard'
-import FilterBar from '@/components/FilterBar'
+import { useState, useCallback, useEffect } from 'react'
+import { loadFilters } from '@/utils/filterState'
+import DashboardHeader from '@/components/DashboardHeader'
 import SalesByYearChart from '@/components/SalesByYearChart'
 
 export default function SalesByYear() {
-  const [filters, setFilters] = useState({
-    year: 'All',
-    customer: 'All',
-    category: 'All'
-  })
+  const [filters, setFilters] = useState(loadFilters())
+
+  useEffect(() => {
+    const savedFilters = loadFilters()
+    console.log('Sales by Year - Loading saved filters:', savedFilters)
+    setFilters(savedFilters)
+  }, [])
 
   const handleFiltersChange = useCallback((newFilters: any) => {
+    console.log('Sales by Year - Filters updated:', newFilters)
     setFilters(newFilters)
   }, [])
 
@@ -102,59 +104,7 @@ Designer Metals Analytics Team
   return (
     <div className="w-full min-h-screen bg-gray-50">
       {/* Header with Logo, Filters, and Export Options */}
-      <div className="w-full bg-gray-50 py-6 px-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            {/* Designer Metals Logo */}
-            <img 
-              src="/Designer Metals Logo.png" 
-              alt="Designer Metals Logo" 
-              className="h-24 object-contain"
-            />
-          </div>
-          
-          <div className="flex items-center gap-8">
-            {/* Filters */}
-            <FilterBar onFiltersChange={handleFiltersChange} />
-            
-            {/* Export Options */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => printUtil('Designer Metals Sales By Year')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 text-sm"
-                title="Print Report"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Print
-              </button>
-              
-              <button
-                onClick={() => exportToImage()}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 text-sm"
-                title="Save as Image"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Image
-              </button>
-              
-              <button
-                onClick={() => emailReport()}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2 text-sm"
-                title="Email Report"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Email
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DashboardHeader pageName="Sales by Year" onFiltersChange={handleFiltersChange} />
 
       {/* Main Content */}
       <div className="p-8">

@@ -1,15 +1,9 @@
 import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
-export async function printDashboard(title: string = 'Designer Metals Dashboard') {
+export async function exportCurrentPageToPDF(pageName: string = 'Dashboard Page') {
   try {
-    // Force chart resizing before capture
-    const chartCanvases = document.querySelectorAll('canvas')
-    chartCanvases.forEach(canvas => {
-      const chartInstance = (canvas as any).__chartjs__ || (canvas as any).chart
-      if (chartInstance && typeof chartInstance.resize === 'function') {
-        chartInstance.resize()
-      }
-    })
+    console.log(`Starting PDF export for ${pageName}...`)
     
     // Hide buttons temporarily
     const buttons = document.querySelectorAll('button')
@@ -77,43 +71,44 @@ export async function printDashboard(title: string = 'Designer Metals Dashboard'
         height: 100% !important;
         max-width: 100% !important;
       }
-      
-      /* Print-specific styles to remove headers/footers */
-      @media print {
-        @page {
-          margin: 0 !important;
-          size: A4 landscape !important;
-        }
-        @page :first {
-          margin: 0 !important;
-        }
-        @page :left {
-          margin: 0 !important;
-        }
-        @page :right {
-          margin: 0 !important;
-        }
-      }
     `
     document.head.appendChild(colorFixStyle)
     
     await new Promise(resolve => setTimeout(resolve, 100))
     
-    // Capture the dashboard as an image
+    // Force chart resizing before capture
+    const chartCanvases = document.querySelectorAll('canvas')
+    chartCanvases.forEach(canvas => {
+      const chartInstance = (canvas as any).__chartjs__ || (canvas as any).chart
+      if (chartInstance && typeof chartInstance.resize === 'function') {
+        chartInstance.resize()
+      }
+    })
+    
+    // Capture the entire dashboard with all content
     const dashboardElement = document.querySelector('.min-h-screen') as HTMLElement
     if (!dashboardElement) {
       alert('Dashboard not found')
       return
     }
     
+    console.log('Capturing full dashboard...')
+    
+    // Scroll to top to ensure we capture everything
+    window.scrollTo(0, 0)
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // Capture the entire dashboard including all charts
     const canvas = await html2canvas(dashboardElement, {
-      scale: 2,
+      scale: 1.5,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
-      windowWidth: dashboardElement.scrollWidth,
-      windowHeight: dashboardElement.scrollHeight
+      width: dashboardElement.scrollWidth,
+      height: dashboardElement.scrollHeight,
+      scrollX: 0,
+      scrollY: 0
     })
     
     // Remove color fix style
@@ -129,80 +124,69 @@ export async function printDashboard(title: string = 'Designer Metals Dashboard'
       }
     })
     
-    // Open print window with the captured image
-    const printWindow = window.open('', '_blank', 'width=800,height=600')
-    if (!printWindow) {
-      alert('Please allow popups to print')
-      return
+    console.log('Creating PDF...')
+    
+    // Create PDF
+    const imgData = canvas.toDataURL('image/png', 1.0)
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    })
+    
+    // Get PDF dimensions
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = pdf.internal.pageSize.getHeight()
+    
+    // Calculate image dimensions to fit the page while maintaining aspect ratio
+    const imgWidth = canvas.width
+    const imgHeight = canvas.height
+    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+    const finalWidth = imgWidth * ratio
+    const finalHeight = imgHeight * ratio
+    
+    // If the content is taller than the page, we'll need multiple pages
+    if (finalHeight > pdfHeight) {
+      console.log('Content is tall, creating multi-page PDF...')
+      
+      // Calculate how many pages we need
+      const pagesNeeded = Math.ceil(finalHeight / pdfHeight)
+      
+      for (let i = 0; i < pagesNeeded; i++) {
+        if (i > 0) {
+          pdf.addPage()
+        }
+        
+        // Calculate the y offset for this page
+        const yOffset = -i * pdfHeight
+        
+        // Add the image to this page
+        pdf.addImage(imgData, 'PNG', 0, yOffset, finalWidth, finalHeight)
+      }
+    } else {
+      // Content fits on one page
+      const x = (pdfWidth - finalWidth) / 2
+      const y = (pdfHeight - finalHeight) / 2
+      pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight)
     }
     
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${title}</title>
-        <style>
-          @page {
-            size: A4 landscape;
-            margin: 0;
-          }
-          
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          
-          body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-          }
-          
-          img {
-            max-width: 100%;
-            max-height: 100vh;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-          }
-          
-          @media print {
-            @page {
-              margin: 0;
-              size: A4 landscape;
-            }
-            
-            body {
-              margin: 0;
-              padding: 0;
-            }
-            
-            img {
-              max-width: 100%;
-              max-height: 100%;
-              width: 100%;
-              height: auto;
-              object-fit: contain;
-              page-break-inside: avoid;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <img src="${canvas.toDataURL('image/png', 1.0)}" onload="setTimeout(() => { window.print(); setTimeout(() => window.close(), 1000); }, 500);">
-      </body>
-      </html>
-    `)
+    // Add title and metadata
+    pdf.setProperties({
+      title: `Designer Metals - ${pageName}`,
+      subject: 'Designer Metals Sales Dashboard',
+      author: 'Designer Metals Analytics',
+      creator: 'Designer Metals Dashboard',
+      producer: 'Designer Metals Dashboard'
+    })
     
-    printWindow.document.close()
+    // Save the PDF
+    const fileName = `designer-metals-${pageName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
+    pdf.save(fileName)
+    
+    console.log('PDF exported successfully!')
     
   } catch (error) {
-    console.error('Print failed:', error)
-    alert('Print failed. Please try again.')
+    console.error('PDF export failed:', error)
+    alert('PDF export failed. Please try again.')
   }
 }
-

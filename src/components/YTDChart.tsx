@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { fetchYearlySalesData } from '@/lib/arinv'
+import ChartWrapper from './ChartWrapper'
 
 interface YTDData {
   year: string
@@ -157,12 +158,12 @@ export default function YTDChart({ filters }: { filters: any }) {
   }
 
   return (
-    <div className="w-full h-full">
+    <ChartWrapper className="w-full h-full">
       <ReactECharts 
         option={option} 
         style={{ height: '100%', width: '100%' }}
         opts={{ renderer: 'canvas' }}
       />
-    </div>
+    </ChartWrapper>
   )
 }

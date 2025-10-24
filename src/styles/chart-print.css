@@ -1,0 +1,62 @@
+/* Chart Print Styles */
+.chart-container {
+  width: 100%;
+  height: 400px; /* Default height for screen */
+  position: relative;
+}
+
+.chart-container canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Print-specific styles for charts */
+@media print {
+  .chart-container {
+    width: 100% !important;
+    height: 300px !important; /* Fixed height for print */
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .chart-container canvas {
+    max-width: 100% !important;
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: contain;
+  }
+  
+  /* Ensure chart containers don't break across pages */
+  .chart-container,
+  .bg-white {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  /* Force chart responsiveness in print */
+  .echarts-for-react {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .echarts-for-react canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Additional chart wrapper styles */
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+}
+
+@media print {
+  .chart-wrapper {
+    height: 300px !important;
+    overflow: visible !important;
+  }
+}

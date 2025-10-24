@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import '@/styles/chart-print.css'
 import AuthGuard from '@/components/AuthGuard'
 import BottomNavWrapper from '@/components/BottomNavWrapper'
 import { Suspense } from 'react'
