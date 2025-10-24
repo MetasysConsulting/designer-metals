@@ -158,22 +158,28 @@ export default function CustomerLocationMap({ filters }: CustomerLocationMapProp
   // Load per-customer points when aggregation is customer
   useEffect(() => {
     const loadCustomerPoints = async () => {
-      if (aggregation !== 'customer') return
+      if (aggregation !== 'customer') {
+        console.log('Not customer aggregation, skipping geocoding')
+        return
+      }
+      console.log('Loading customer points with filters:', filters)
       try {
         const res = await fetch('/api/geocode-customers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(filters)
         })
+        console.log('Geocoding API response status:', res.status)
         if (res.ok) {
           const pts = await res.json()
           console.log('Customer points fetched:', pts.length, pts)
           setCustomerPoints(pts)
         } else {
-          console.log('Failed to fetch customer points:', res.status)
+          console.log('Failed to fetch customer points:', res.status, await res.text())
           setCustomerPoints([])
         }
-      } catch {
+      } catch (error) {
+        console.log('Error fetching customer points:', error)
         setCustomerPoints([])
       }
     }

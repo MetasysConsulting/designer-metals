@@ -46,6 +46,8 @@ export async function POST(request: NextRequest) {
 
     // If Supabase is not configured, we can still geocode live (no cache)
     const supabaseConfigured = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co')
+    console.log('Supabase configured:', supabaseConfigured)
+    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
 
     // Pull unique customers with full address info
     let query = supabase
@@ -71,6 +73,7 @@ export async function POST(request: NextRequest) {
       console.error('ARINV fetch failed for geocoding:', error)
       return NextResponse.json([])
     }
+    console.log('Raw database data:', data?.length || 0, 'rows')
 
     const rows = (data || []).filter(r => r.CITY && r.STATE)
     console.log('Found rows for geocoding:', rows.length)
