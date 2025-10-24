@@ -22,6 +22,7 @@ interface CustomerLocationData {
 
 interface CustomerPoint {
   name: string
+  address: string
   city: string
   state: string
   zip: string
@@ -204,10 +205,17 @@ export default function MapComponent({ locationData, mode = 'bubbles', metric = 
             {customerPoints.map((p, idx) => (
               <Marker key={idx} position={[p.lat, p.lng]} icon={createCustomIcon(14, '#0ea5e9')}>
                 <Popup>
-                  <div className="p-2">
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">{p.name}</h3>
-                    <p className="text-sm text-gray-600">{p.city}, {p.state} {p.zip}</p>
-                    <p className="text-sm text-gray-600 mt-1"><span className="font-medium">Total Sales:</span> ${p.totalSales.toLocaleString()}</p>
+                  <div className="p-3 min-w-[250px]">
+                    <h3 className="font-bold text-lg text-gray-900 mb-2">{p.name}</h3>
+                    <div className="space-y-1">
+                      {p.address && (
+                        <p className="text-sm text-gray-700 font-medium">{p.address}</p>
+                      )}
+                      <p className="text-sm text-gray-600">{p.city}, {p.state} {p.zip}</p>
+                      <p className="text-sm text-gray-600 mt-2">
+                        <span className="font-medium">Total Sales:</span> ${p.totalSales.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
                 </Popup>
               </Marker>

@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 type ARINVRow = {
   NAME: string | null
   ADDRESS1: string | null
+  ADDRESS2: string | null
   CITY: string | null
   STATE: string | null
   ZIP: string | null
@@ -12,6 +13,7 @@ type ARINVRow = {
 
 type CustomerPoint = {
   name: string
+  address: string
   city: string
   state: string
   zip: string
@@ -20,8 +22,8 @@ type CustomerPoint = {
   totalSales: number
 }
 
-function buildAddressKey(city: string, state: string, zip: string) {
-  return `${city?.trim().toUpperCase() || ''}|${state?.trim().toUpperCase() || ''}|${zip?.trim() || ''}`
+function buildAddressKey(address: string, city: string, state: string, zip: string) {
+  return `${address?.trim().toUpperCase() || ''}|${city?.trim().toUpperCase() || ''}|${state?.trim().toUpperCase() || ''}|${zip?.trim() || ''}`
 }
 
 async function geocodeWithNominatim(query: string): Promise<{ lat: number; lng: number } | null> {
@@ -45,10 +47,10 @@ export async function POST(request: NextRequest) {
     // If Supabase is not configured, we can still geocode live (no cache)
     const supabaseConfigured = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co')
 
-    // Pull unique customers with address-ish info
+    // Pull unique customers with full address info
     let query = supabase
       .from('ARINV')
-      .select('NAME, ADDRESS1, CITY, STATE, ZIP, TOTAL')
+      .select('NAME, ADDRESS1, ADDRESS2, CITY, STATE, ZIP, TOTAL')
       .not('CITY', 'is', null)
       .not('STATE', 'is', null)
 
@@ -72,27 +74,30 @@ export async function POST(request: NextRequest) {
 
     const rows = (data || []).filter(r => r.CITY && r.STATE)
 
-    // Aggregate per customer (or per row if NAME missing)
-    const byCustomer: Map<string, { name: string; city: string; state: string; zip: string; totalSales: number }> = new Map()
+    // Aggregate per customer with full address
+    const byCustomer: Map<string, { name: string; address: string; city: string; state: string; zip: string; totalSales: number }> = new Map()
     for (const r of rows) {
       const name = (r.NAME || 'Unknown').trim()
+      const address1 = (r.ADDRESS1 || '').trim()
+      const address2 = (r.ADDRESS2 || '').trim()
+      const fullAddress = [address1, address2].filter(Boolean).join(', ')
       const city = (r.CITY || '').trim()
       const state = (r.STATE || '').trim()
       const zip = (r.ZIP || '').trim()
-      const key = `${name}|${city}|${state}|${zip}`.toUpperCase()
+      const key = `${name}|${fullAddress}|${city}|${state}|${zip}`.toUpperCase()
       const total = parseFloat(r.TOTAL || '0') || 0
       const existing = byCustomer.get(key)
       if (existing) existing.totalSales += total
-      else byCustomer.set(key, { name, city, state, zip, totalSales: total })
+      else byCustomer.set(key, { name, address: fullAddress, city, state, zip, totalSales: total })
     }
 
     const results: CustomerPoint[] = []
-    const pendingToGeocode: { key: string; name: string; city: string; state: string; zip: string; totalSales: number }[] = []
+    const pendingToGeocode: { key: string; name: string; address: string; city: string; state: string; zip: string; totalSales: number }[] = []
 
     // Try cache first if supabase configured
     if (supabaseConfigured) {
       for (const [key, c] of byCustomer.entries()) {
-        const addrKey = buildAddressKey(c.city, c.state, c.zip)
+        const addrKey = buildAddressKey(c.address, c.city, c.state, c.zip)
         const { data: cached } = await supabase
           .from('customer_geocode')
           .select('lat, lng, city, state, zip')
@@ -100,7 +105,7 @@ export async function POST(request: NextRequest) {
           .limit(1)
           .maybeSingle()
         if (cached && typeof cached.lat === 'number' && typeof cached.lng === 'number') {
-          results.push({ name: c.name, city: c.city, state: c.state, zip: c.zip, lat: cached.lat, lng: cached.lng, totalSales: c.totalSales })
+          results.push({ name: c.name, address: c.address, city: c.city, state: c.state, zip: c.zip, lat: cached.lat, lng: cached.lng, totalSales: c.totalSales })
         } else {
           pendingToGeocode.push({ key, ...c })
         }
@@ -118,15 +123,16 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < pendingToGeocode.length; i++) {
       const c = pendingToGeocode[i]
-      const queryParts = [c.city, c.state, c.zip, 'USA'].filter(Boolean).join(', ')
+      // Build full address query for precise geocoding
+      const queryParts = [c.address, c.city, c.state, c.zip, 'USA'].filter(Boolean).join(', ')
       const geocoded = await geocodeWithNominatim(queryParts)
       const fallback = STATE_COORDINATES[(c.state || '').toUpperCase()]
       const finalLat = geocoded?.lat ?? fallback?.lat
       const finalLng = geocoded?.lng ?? fallback?.lng
       if (typeof finalLat === 'number' && typeof finalLng === 'number') {
-        results.push({ name: c.name, city: c.city, state: c.state, zip: c.zip, lat: finalLat, lng: finalLng, totalSales: c.totalSales })
+        results.push({ name: c.name, address: c.address, city: c.city, state: c.state, zip: c.zip, lat: finalLat, lng: finalLng, totalSales: c.totalSales })
         if (geocoded && supabaseConfigured) {
-          const address_key = buildAddressKey(c.city, c.state, c.zip)
+          const address_key = buildAddressKey(c.address, c.city, c.state, c.zip)
           await supabase.from('customer_geocode').upsert({
             address_key,
             city: c.city,
