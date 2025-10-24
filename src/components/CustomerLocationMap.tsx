@@ -98,6 +98,11 @@ export default function CustomerLocationMap({ filters }: CustomerLocationMapProp
   const [mode, setMode] = useState<'bubbles' | 'choropleth'>('bubbles')
   const [metric, setMetric] = useState<'customers' | 'sales'>('customers')
   const [aggregation, setAggregation] = useState<'state' | 'customer'>('state')
+  
+  // Debug aggregation changes
+  useEffect(() => {
+    console.log('Aggregation changed to:', aggregation)
+  }, [aggregation])
   const [customerPoints, setCustomerPoints] = useState<CustomerPoint[]>([])
 
   // Fetch customer location data
@@ -210,11 +215,17 @@ export default function CustomerLocationMap({ filters }: CustomerLocationMapProp
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-gray-100 rounded p-1">
             <button
-              onClick={() => setAggregation('state')}
+              onClick={() => {
+                console.log('Clicked By State button')
+                setAggregation('state')
+              }}
               className={`px-2 py-1 text-xs rounded ${aggregation==='state' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white'}`}
             >By State</button>
             <button
-              onClick={() => setAggregation('customer')}
+              onClick={() => {
+                console.log('Clicked Per Customer button')
+                setAggregation('customer')
+              }}
               className={`px-2 py-1 text-xs rounded ${aggregation==='customer' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white'}`}
             >Per Customer</button>
           </div>
