@@ -42,6 +42,23 @@ export async function printDashboard(title: string = 'Designer Metals Dashboard'
       .text-blue-600 { color: #2563eb !important; }
       .text-green-600 { color: #16a34a !important; }
       .text-teal-600 { color: #0d9488 !important; }
+      
+      /* Print-specific styles to remove headers/footers */
+      @media print {
+        @page {
+          margin: 0 !important;
+          size: A4 landscape !important;
+        }
+        @page :first {
+          margin: 0 !important;
+        }
+        @page :left {
+          margin: 0 !important;
+        }
+        @page :right {
+          margin: 0 !important;
+        }
+      }
     `
     document.head.appendChild(colorFixStyle)
     
@@ -77,94 +94,78 @@ export async function printDashboard(title: string = 'Designer Metals Dashboard'
       }
     })
     
-    // Open print window with the captured image
-    const printWindow = window.open('', '_blank', 'width=800,height=600')
-    if (!printWindow) {
-      alert('Please allow popups to print')
-      return
-    }
+    // Try a different approach - create a hidden div with the image and print directly
+    const printContainer = document.createElement('div')
+    printContainer.className = 'print-container'
+    printContainer.style.position = 'absolute'
+    printContainer.style.left = '-9999px'
+    printContainer.style.top = '-9999px'
+    printContainer.style.width = '210mm' // A4 width
+    printContainer.style.height = '297mm' // A4 height
+    printContainer.style.background = 'white'
+    printContainer.style.padding = '0'
+    printContainer.style.margin = '0'
     
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${title}</title>
-        <style>
-          @page {
-            size: A4 landscape;
-            margin: 0;
-          }
-          
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          
-          body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-          }
-          
-          img {
-            max-width: 100%;
-            max-height: 100vh;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-          }
-          
-          @media print {
-            @page {
-              margin: 0;
-              size: A4 landscape;
-            }
-            
-            body {
-              margin: 0;
-              padding: 0;
-            }
-            
-            img {
-              max-width: 100%;
-              max-height: 100%;
-              width: 100%;
-              height: auto;
-              object-fit: contain;
-              page-break-inside: avoid;
-            }
-            
-            /* Hide browser headers and footers */
-            @page {
-              margin: 0;
-              @top-left { content: ""; }
-              @top-center { content: ""; }
-              @top-right { content: ""; }
-              @bottom-left { content: ""; }
-              @bottom-center { content: ""; }
-              @bottom-right { content: ""; }
-            }
-            
-            /* Additional print styles to remove any unwanted elements */
-            * {
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <img src="${canvas.toDataURL('image/png', 1.0)}" onload="setTimeout(() => { window.print(); setTimeout(() => window.close(), 1000); }, 500);">
-      </body>
-      </html>
-    `)
+    const printImage = document.createElement('img')
+    printImage.src = canvas.toDataURL('image/png', 1.0)
+    printImage.style.width = '100%'
+    printImage.style.height = '100%'
+    printImage.style.objectFit = 'contain'
+    printImage.style.display = 'block'
     
-    printWindow.document.close()
+    printContainer.appendChild(printImage)
+    document.body.appendChild(printContainer)
+    
+    // Add print-specific CSS
+    const printStyle = document.createElement('style')
+    printStyle.id = 'print-style'
+    printStyle.textContent = `
+      @media print {
+        @page {
+          margin: 0 !important;
+          size: A4 landscape !important;
+        }
+        @page :first {
+          margin: 0 !important;
+        }
+        @page :left {
+          margin: 0 !important;
+        }
+        @page :right {
+          margin: 0 !important;
+        }
+        body {
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .print-container {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+        }
+        .print-container img {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: contain !important;
+        }
+      }
+    `
+    document.head.appendChild(printStyle)
+    
+    // Wait a moment then print
+    setTimeout(() => {
+      window.print()
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(printContainer)
+        const styleToRemove = document.getElementById('print-style')
+        if (styleToRemove) {
+          document.head.removeChild(styleToRemove)
+        }
+      }, 1000)
+    }, 500)
     
   } catch (error) {
     console.error('Print failed:', error)
