@@ -79,7 +79,12 @@ export default function FilterBar({ onFiltersChange }: { onFiltersChange: (filte
       
       const categories = [...new Set(
         categoryData?.map(record => record.TREE_DESCR).filter(Boolean) || []
-      )].sort()
+      )]
+        .filter(category => 
+          category !== 'Employee Appreciation' && 
+          category !== 'Shipped To'
+        )
+        .sort()
 
       setOptions({
         years: ['All', ...years],

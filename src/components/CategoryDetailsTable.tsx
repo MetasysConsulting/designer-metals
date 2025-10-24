@@ -38,6 +38,7 @@ export default function CategoryDetailsTable({ filters }: { filters: any }) {
         .not('TOTAL', 'is', null)
         .not('INV_DATE', 'is', null)
         .not('TREE_DESCR', 'is', null)
+        .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
 
       // Apply filters
       if (filters.year && filters.year !== 'All') {

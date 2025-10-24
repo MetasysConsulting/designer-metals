@@ -43,6 +43,7 @@ export async function fetchMonthlySalesData(filters: any = {}): Promise<{ month:
     .select('TOTAL, INV_DATE, NAME, TREE_DESCR')
     .not('TOTAL', 'is', null)
     .not('INV_DATE', 'is', null)
+    .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
 
   // Apply filters
   if (filters.year && filters.year !== 'All') {
@@ -95,6 +96,7 @@ export async function fetchCategorySalesData(filters: any = {}): Promise<{ name:
     .select('TOTAL, TREE_DESCR, NAME, INV_DATE')
     .not('TOTAL', 'is', null)
     .not('TREE_DESCR', 'is', null)
+    .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
 
   // Apply filters
   if (filters.year && filters.year !== 'All') {
@@ -140,6 +142,7 @@ export async function fetchYearlySalesData(filters: any = {}): Promise<{ year: s
     .select('TOTAL, INV_DATE, NAME, TREE_DESCR')
     .not('TOTAL', 'is', null)
     .not('INV_DATE', 'is', null)
+    .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
 
   // Apply filters
   if (filters.year && filters.year !== 'All') {

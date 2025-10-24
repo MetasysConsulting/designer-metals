@@ -94,6 +94,7 @@ export default function YTDDataTable({ filters }: YTDDataTableProps) {
         .select('TOTAL, INV_DATE, NAME, TREE_DESCR')
         .not('TOTAL', 'is', null)
         .not('INV_DATE', 'is', null)
+        .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
 
       // Apply filters
       if (filters.year && filters.year !== 'All') {
