@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
       .select('STATE, TOTAL, NAME')
       .not('STATE', 'is', null)
       .not('TOTAL', 'is', null)
-      .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
+      .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+      .not('TREE_DESCR', 'eq', 'Shipped To')
 
     // Apply filters
     if (filters.year && filters.year !== 'All') {

@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
       .select('NAME, ADDRESS1, ADDRESS2, CITY, STATE, ZIP, TOTAL')
       .not('CITY', 'is', null)
       .not('STATE', 'is', null)
-      .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
+      .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+      .not('TREE_DESCR', 'eq', 'Shipped To')
 
     if (filters?.year && filters.year !== 'All') {
       const startDate = `${filters.year}-01-01`

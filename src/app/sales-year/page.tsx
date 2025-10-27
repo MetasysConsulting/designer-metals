@@ -135,20 +135,12 @@ Designer Metals Analytics Team
               <span className="text-sm text-gray-700">Contractor</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-pink-500 rounded"></div>
-              <span className="text-sm text-gray-700">Employee Appreciation</span>
-            </div>
-            <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-purple-800 rounded"></div>
               <span className="text-sm text-gray-700">LuxGuard</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-yellow-500 rounded"></div>
               <span className="text-sm text-gray-700">Shed</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-red-500 rounded"></div>
-              <span className="text-sm text-gray-700">Shipped to</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 bg-teal-500 rounded"></div>

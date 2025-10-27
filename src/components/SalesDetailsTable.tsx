@@ -48,7 +48,8 @@ export default function SalesDetailsTable({ filters }: { filters: any }) {
         .select('TREE_DESCR, INVOICE, INV_DATE, SUBTOTAL, TAX, TOTAL, TOTAL_PAID, NAME, DESCR')
         .not('TOTAL', 'is', null)
         .not('INV_DATE', 'is', null)
-        .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
+        .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+        .not('TREE_DESCR', 'eq', 'Shipped To')
         .order('INV_DATE', { ascending: false })
         .limit(100) // Limit for performance
 

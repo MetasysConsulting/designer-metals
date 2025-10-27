@@ -112,8 +112,8 @@ Designer Metals Analytics Team
   // Category cards data
   const categories = [
     'Carports', 'Carports Down Payment', 'Coil', 'Contractor', 
-    'Customers', 'Employee Appreciation', 'LuxGuard', 'Shed', 
-    'Shipped to', 'Standard', 'Wholesale'
+    'Customers', 'LuxGuard', 'Shed', 
+    'Standard', 'Wholesale'
   ]
 
   return (

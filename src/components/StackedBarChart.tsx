@@ -36,7 +36,8 @@ export default function StackedBarChart({ filters }: { filters: any }) {
         .not('TOTAL', 'is', null)
         .not('INV_DATE', 'is', null)
         .not('TREE_DESCR', 'is', null)
-        .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
+        .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+        .not('TREE_DESCR', 'eq', 'Shipped To')
 
       // Apply filters
       if (filters.year && filters.year !== 'All') {
@@ -110,8 +111,6 @@ export default function StackedBarChart({ filters }: { filters: any }) {
     'LuxGuard': '#2ca02c',
     'Wholesale': '#d62728',
     'Carports Down P...': '#8c564b',
-    'Shipped to': '#e377c2',
-    'Employee A...': '#bcbd22'
   }
 
   const option = {

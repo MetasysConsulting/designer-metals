@@ -27,10 +27,8 @@ export default function SalesByYearChart({ filters }: SalesByYearChartProps) {
       { name: 'Carports Down Payment', color: '#1e40af' },
       { name: 'Coil', color: '#f97316' },
       { name: 'Contractor', color: '#a855f7' },
-      { name: 'Employee Appreciation', color: '#ec4899' },
       { name: 'LuxGuard', color: '#7c3aed' },
       { name: 'Shed', color: '#eab308' },
-      { name: 'Shipped to', color: '#ef4444' },
       { name: 'Standard', color: '#14b8a6' },
       { name: 'Wholesale', color: '#22c55e' }
     ]

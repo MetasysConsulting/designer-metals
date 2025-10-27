@@ -35,7 +35,8 @@ export default function CategoryBarChart({ filters }: { filters: any }) {
         .select('TOTAL, TREE_DESCR')
         .not('TOTAL', 'is', null)
         .not('TREE_DESCR', 'is', null)
-        .not('TREE_DESCR', 'in', ['Employee Appreciation', 'Shipped To'])
+        .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+        .not('TREE_DESCR', 'eq', 'Shipped To')
 
       // Apply filters
       if (filters.year && filters.year !== 'All') {
