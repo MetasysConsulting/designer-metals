@@ -121,37 +121,12 @@ export default function CustomerLocationMap({ filters }: CustomerLocationMapProp
           const data = await response.json()
           setLocationData(data)
         } else {
-          // Fallback: create mock data for demonstration
-          const mockData: CustomerLocationData[] = [
-            { state: 'CA', customerCount: 45, totalSales: 125000, coordinates: STATE_COORDINATES['CA'] },
-            { state: 'TX', customerCount: 32, totalSales: 98000, coordinates: STATE_COORDINATES['TX'] },
-            { state: 'FL', customerCount: 28, totalSales: 87000, coordinates: STATE_COORDINATES['FL'] },
-            { state: 'NY', customerCount: 25, totalSales: 76000, coordinates: STATE_COORDINATES['NY'] },
-            { state: 'IL', customerCount: 22, totalSales: 65000, coordinates: STATE_COORDINATES['IL'] },
-            { state: 'PA', customerCount: 18, totalSales: 54000, coordinates: STATE_COORDINATES['PA'] },
-            { state: 'OH', customerCount: 15, totalSales: 42000, coordinates: STATE_COORDINATES['OH'] },
-            { state: 'GA', customerCount: 12, totalSales: 35000, coordinates: STATE_COORDINATES['GA'] },
-            { state: 'NC', customerCount: 10, totalSales: 28000, coordinates: STATE_COORDINATES['NC'] },
-            { state: 'MI', customerCount: 8, totalSales: 22000, coordinates: STATE_COORDINATES['MI'] }
-          ]
-          setLocationData(mockData)
+          console.error('Failed to fetch location data:', response.status)
+          setLocationData([])
         }
       } catch (error) {
         console.error('Error fetching location data:', error)
-        // Use mock data as fallback
-        const mockData: CustomerLocationData[] = [
-          { state: 'CA', customerCount: 45, totalSales: 125000, coordinates: STATE_COORDINATES['CA'] },
-          { state: 'TX', customerCount: 32, totalSales: 98000, coordinates: STATE_COORDINATES['TX'] },
-          { state: 'FL', customerCount: 28, totalSales: 87000, coordinates: STATE_COORDINATES['FL'] },
-          { state: 'NY', customerCount: 25, totalSales: 76000, coordinates: STATE_COORDINATES['NY'] },
-          { state: 'IL', customerCount: 22, totalSales: 65000, coordinates: STATE_COORDINATES['IL'] },
-          { state: 'PA', customerCount: 18, totalSales: 54000, coordinates: STATE_COORDINATES['PA'] },
-          { state: 'OH', customerCount: 15, totalSales: 42000, coordinates: STATE_COORDINATES['OH'] },
-          { state: 'GA', customerCount: 12, totalSales: 35000, coordinates: STATE_COORDINATES['GA'] },
-          { state: 'NC', customerCount: 10, totalSales: 28000, coordinates: STATE_COORDINATES['NC'] },
-          { state: 'MI', customerCount: 8, totalSales: 22000, coordinates: STATE_COORDINATES['MI'] }
-        ]
-        setLocationData(mockData)
+        setLocationData([])
       } finally {
         setLoading(false)
       }

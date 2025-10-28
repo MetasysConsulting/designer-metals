@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as echarts from 'echarts'
-import { fetchMonthlySalesData } from '@/lib/arinv'
+import { createClient } from '@supabase/supabase-js'
 
 interface MonthlySalesChartProps {
   filters: {
@@ -12,164 +12,232 @@ interface MonthlySalesChartProps {
   }
 }
 
+interface MonthlyData {
+  month: string
+  year: string
+  amount: number
+}
+
 export default function MonthlySalesChart({ filters }: MonthlySalesChartProps) {
   const chartRef = useRef<HTMLDivElement>(null)
+  const [data, setData] = useState<MonthlyData[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!chartRef.current) return
-
-    const chart = echarts.init(chartRef.current)
-    
     const fetchData = async () => {
+      setLoading(true)
+      
+      // Check if Supabase is configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+        console.warn('Supabase not configured, returning empty data for monthly sales chart')
+        setData([])
+        setLoading(false)
+        return
+      }
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      )
+
       try {
-        const monthlyData = await fetchMonthlySalesData(filters)
-        console.log('Monthly sales data for chart:', monthlyData)
+        let query = supabase
+          .from('ARINV')
+          .select('TOTAL, INV_DATE, NAME, TREE_DESCR')
+          .not('TOTAL', 'is', null)
+          .not('INV_DATE', 'is', null)
+          .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+          .not('TREE_DESCR', 'eq', 'Shipped To')
 
-        // Group data by year and month
-        const yearData: { [key: string]: { [key: string]: number } } = {}
-        const allMonths = new Set<string>()
+        // Apply filters
+        if (filters.year && filters.year !== 'All') {
+          const startDate = `${filters.year}-01-01`
+          const endDate = `${filters.year}-12-31`
+          query = query.gte('INV_DATE', startDate).lte('INV_DATE', endDate)
+        }
 
-        monthlyData.forEach(item => {
-          const year = new Date().getFullYear().toString() // Use current year for demo
-          if (!yearData[year]) {
-            yearData[year] = {}
+        if (filters.customer && filters.customer !== 'All') {
+          query = query.eq('NAME', filters.customer)
+        }
+
+        if (filters.category && filters.category !== 'All') {
+          query = query.eq('TREE_DESCR', filters.category)
+        }
+
+        const { data: records, error } = await query
+
+        if (error) {
+          console.error('Error fetching monthly sales data:', error)
+          setData([])
+          setLoading(false)
+          return
+        }
+
+        // Process data by month and year
+        const monthlyData: { [key: string]: { [key: string]: number } } = {}
+        
+        records?.forEach(record => {
+          if (record.INV_DATE) {
+            const date = new Date(record.INV_DATE)
+            const month = date.toLocaleDateString('en-US', { month: 'long' })
+            const year = date.getFullYear().toString()
+            const amount = parseFloat(record.TOTAL || '0') || 0
+            
+            if (!monthlyData[month]) {
+              monthlyData[month] = {}
+            }
+            
+            if (monthlyData[month][year]) {
+              monthlyData[month][year] += amount
+            } else {
+              monthlyData[month][year] = amount
+            }
           }
-          yearData[year][item.month] = item.amount
-          allMonths.add(item.month)
         })
 
-        // Create sample data for multiple years (2020-2025) like in Power BI report
-        const sampleData = {
-          '2020': { 'January': 0, 'February': 0, 'March': 0, 'April': 0, 'May': 0, 'June': 0, 'July': 0, 'August': 0, 'September': 0, 'October': 0, 'November': 0, 'December': 0 },
-          '2021': { 'January': 50000, 'February': 45000, 'March': 60000, 'April': 55000, 'May': 70000, 'June': 80000, 'July': 90000, 'August': 85000, 'September': 75000, 'October': 65000, 'November': 60000, 'December': 55000 },
-          '2022': { 'January': 80000, 'February': 75000, 'March': 95000, 'April': 90000, 'May': 110000, 'June': 125000, 'July': 140000, 'August': 135000, 'September': 120000, 'October': 105000, 'November': 95000, 'December': 85000 },
-          '2023': { 'January': 120000, 'February': 115000, 'March': 145000, 'April': 140000, 'May': 170000, 'June': 190000, 'July': 210000, 'August': 205000, 'September': 185000, 'October': 165000, 'November': 150000, 'December': 135000 },
-          '2024': { 'January': 180000, 'February': 175000, 'March': 220000, 'April': 215000, 'May': 260000, 'June': 290000, 'July': 320000, 'August': 315000, 'September': 285000, 'October': 255000, 'November': 230000, 'December': 205000 },
-          '2025': { 'January': 250000, 'February': 245000, 'March': 310000, 'April': 305000, 'May': 370000, 'June': 410000, 'July': 450000, 'August': 445000, 'September': 405000, 'October': 365000, 'November': 330000, 'December': 295000 }
-        }
+        // Convert to array format
+        const processedData: MonthlyData[] = []
+        Object.keys(monthlyData).forEach(month => {
+          Object.keys(monthlyData[month]).forEach(year => {
+            processedData.push({
+              month,
+              year,
+              amount: monthlyData[month][year] / 1000 // Convert to thousands
+            })
+          })
+        })
 
-        // Get all months in the order they appear in the Power BI report
-        const months = ['July', 'August', 'June', 'September', 'May', 'April', 'March', 'January', 'October', 'December', 'November', 'February']
-        
-        // Prepare series data for each year
-        const years = ['2020', '2021', '2022', '2023', '2024', '2025']
-        const series = years.map((year, index) => ({
-          name: year,
-          type: 'bar',
-          data: months.map(month => sampleData[year as keyof typeof sampleData][month] || 0),
-          itemStyle: {
-            color: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b'][index]
-          }
-        }))
-
-        const option = {
-          title: {
-            text: 'Total Sales by Month Name and Year',
-            left: 'center',
-            textStyle: {
-              fontSize: 18,
-              fontWeight: 'bold',
-              color: '#374151'
-            }
-          },
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-              type: 'shadow'
-            },
-            formatter: function(params: any) {
-              let result = `<strong>${params[0].axisValue}</strong><br/>`
-              params.forEach((param: any) => {
-                result += `${param.seriesName}: $${(param.value / 1000).toFixed(0)}K<br/>`
-              })
-              return result
-            }
-          },
-          legend: {
-            data: years,
-            top: 30,
-            textStyle: {
-              fontSize: 12
-            }
-          },
-          grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            top: '15%',
-            containLabel: true
-          },
-          xAxis: {
-            type: 'category',
-            data: months,
-            axisLabel: {
-              color: '#6b7280',
-              fontSize: 11,
-              rotate: 45
-            },
-            axisLine: {
-              lineStyle: {
-                color: '#e5e7eb'
-              }
-            }
-          },
-          yAxis: {
-            type: 'value',
-            name: 'Total Sales',
-            nameLocation: 'middle',
-            nameGap: 50,
-            nameTextStyle: {
-              color: '#6b7280',
-              fontSize: 12,
-              fontWeight: 'bold'
-            },
-            axisLabel: {
-              color: '#6b7280',
-              fontSize: 11,
-              formatter: function(value: number) {
-                return `${(value / 1000000).toFixed(0)}M`
-              }
-            },
-            axisLine: {
-              lineStyle: {
-                color: '#e5e7eb'
-              }
-            },
-            splitLine: {
-              lineStyle: {
-                color: '#f3f4f6'
-              }
-            }
-          },
-          series: series
-        }
-
-        chart.setOption(option)
-
-        const handleResize = () => {
-          chart.resize()
-        }
-
-        window.addEventListener('resize', handleResize)
-
-        return () => {
-          window.removeEventListener('resize', handleResize)
-          chart.dispose()
-        }
-
+        setData(processedData)
       } catch (error) {
-        console.error('Error creating monthly sales chart:', error)
+        console.error('Error processing monthly sales data:', error)
+        setData([])
+      } finally {
+        setLoading(false)
       }
     }
 
     fetchData()
-
   }, [filters])
 
+  useEffect(() => {
+    if (!chartRef.current || loading) return
+
+    const chart = echarts.init(chartRef.current)
+    
+    // Get unique months and years
+    const months = [...new Set(data.map(item => item.month))]
+    const years = [...new Set(data.map(item => item.year))].sort()
+    
+    // Generate colors for each year
+    const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+
+    // Prepare series data for each year
+    const series = years.map((year, index) => ({
+      name: year,
+      type: 'bar',
+      data: months.map(month => {
+        const item = data.find(d => d.month === month && d.year === year)
+        return item ? item.amount : 0
+      }),
+      itemStyle: {
+        color: colors[index % colors.length]
+      }
+    }))
+
+    const option = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        },
+        formatter: function(params: any) {
+          let result = `<strong>${params[0].axisValue}</strong><br/>`
+          params.forEach((param: any) => {
+            if (param.value > 0) {
+              result += `${param.seriesName}: $${(param.value / 1000).toFixed(0)}K<br/>`
+            }
+          })
+          return result
+        }
+      },
+      legend: {
+        data: years,
+        top: 'top',
+        textStyle: {
+          color: '#6b7280',
+          fontSize: 11
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        top: '15%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: months,
+        axisLabel: {
+          color: '#6b7280',
+          fontSize: 11
+        },
+        axisLine: {
+          lineStyle: {
+            color: '#e5e7eb'
+          }
+        }
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Total Sales (Thousands)',
+        nameLocation: 'middle',
+        nameGap: 30,
+        nameTextStyle: {
+          color: '#6b7280',
+          fontSize: 12,
+          fontWeight: 'bold'
+        },
+        axisLabel: {
+          color: '#6b7280',
+          fontSize: 11,
+          formatter: function(value: number) {
+            return `$${value}K`
+          }
+        },
+        axisLine: {
+          lineStyle: {
+            color: '#e5e7eb'
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: '#f3f4f6',
+            type: 'dashed'
+          }
+        }
+      },
+      series: series
+    }
+
+    chart.setOption(option)
+
+    return () => {
+      chart.dispose()
+    }
+  }, [data, loading])
+
+  if (loading) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center">
+        <div className="text-gray-500">Loading chart data...</div>
+      </div>
+    )
+  }
+
   return (
-    <div 
-      ref={chartRef} 
-      style={{ width: '100%', height: '100%' }}
-    />
+    <div className="w-full">
+      <div ref={chartRef} className="w-full h-96"></div>
+    </div>
   )
 }

@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as echarts from 'echarts'
+import { createClient } from '@supabase/supabase-js'
 
 interface SalesByYearChartProps {
   filters: {
@@ -11,142 +12,132 @@ interface SalesByYearChartProps {
   }
 }
 
+interface MonthlyData {
+  month: string
+  amount: number
+}
+
 export default function SalesByYearChart({ filters }: SalesByYearChartProps) {
   const chartRef = useRef<HTMLDivElement>(null)
+  const [data, setData] = useState<MonthlyData[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!chartRef.current) return
+    const fetchData = async () => {
+      setLoading(true)
+      
+      // Check if Supabase is configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+        console.warn('Supabase not configured, returning empty data for sales by year chart')
+        setData([])
+        setLoading(false)
+        return
+      }
 
-    const chart = echarts.init(chartRef.current)
-    
-    // Sample data matching the Power BI report
-    const months = ['July', 'August', 'June', 'September', 'May', 'April', 'March', 'January', 'February']
-    
-    const categories = [
-      { name: 'Carports', color: '#60a5fa' },
-      { name: 'Carports Down Payment', color: '#1e40af' },
-      { name: 'Coil', color: '#f97316' },
-      { name: 'Contractor', color: '#a855f7' },
-      { name: 'LuxGuard', color: '#7c3aed' },
-      { name: 'Shed', color: '#eab308' },
-      { name: 'Standard', color: '#14b8a6' },
-      { name: 'Wholesale', color: '#22c55e' }
-    ]
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      )
 
-    // Sample data for each month and category
-    const monthlyData = {
-      'July': {
-        'Coil': 1.50,
-        'Carports': 0.25,
-        'Contractor': 0.17,
-        'LuxGuard': 0.13,
-        'Wholesale': 0.06,
-        'Shed': 0.01
-      },
-      'August': {
-        'Coil': 0.94,
-        'Carports': 0.22,
-        'Wholesale': 0.22,
-        'Contractor': 0.08,
-        'LuxGuard': 0.04,
-        'Shed': 0.03
-      },
-      'June': {
-        'Coil': 0.57,
-        'Contractor': 0.27,
-        'Carports': 0.22,
-        'Wholesale': 0.18,
-        'LuxGuard': 0.14,
-        'Shed': 0.06,
-        'Carports Down Payment': 0.02
-      },
-      'September': {
-        'Coil': 0.87,
-        'Wholesale': 0.19,
-        'Carports': 0.16,
-        'Contractor': 0.08,
-        'LuxGuard': 0.02
-      },
-      'May': {
-        'Coil': 0.36,
-        'Wholesale': 0.32,
-        'Carports': 0.22,
-        'Contractor': 0.16,
-        'LuxGuard': 0.08,
-        'Shed': 0.01
-      },
-      'April': {
-        'Coil': 0.51,
-        'Carports': 0.20,
-        'Wholesale': 0.20,
-        'Contractor': 0.11,
-        'LuxGuard': 0.04,
-        'Shed': 0.01
-      },
-      'March': {
-        'Coil': 0.31,
-        'Carports': 0.22,
-        'Wholesale': 0.15,
-        'Contractor': 0.07,
-        'LuxGuard': 0.03,
-        'Shed': 0.01
-      },
-      'January': {
-        'Coil': 0.32,
-        'Carports': 0.17,
-        'Wholesale': 0.15,
-        'Contractor': 0.09,
-        'LuxGuard': 0.04,
-        'Shed': 0.01
-      },
-      'February': {
-        'Coil': 0.15,
-        'Wholesale': 0.10,
-        'Carports': 0.06,
-        'Contractor': 0.06
+      try {
+        let query = supabase
+          .from('ARINV')
+          .select('TOTAL, INV_DATE, NAME, TREE_DESCR')
+          .not('TOTAL', 'is', null)
+          .not('INV_DATE', 'is', null)
+          .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+          .not('TREE_DESCR', 'eq', 'Shipped To')
+
+        // Apply filters
+        if (filters.year && filters.year !== 'All') {
+          const startDate = `${filters.year}-01-01`
+          const endDate = `${filters.year}-12-31`
+          query = query.gte('INV_DATE', startDate).lte('INV_DATE', endDate)
+        }
+
+        if (filters.customer && filters.customer !== 'All') {
+          query = query.eq('NAME', filters.customer)
+        }
+
+        if (filters.category && filters.category !== 'All') {
+          query = query.eq('TREE_DESCR', filters.category)
+        }
+
+        const { data: records, error } = await query
+
+        if (error) {
+          console.error('Error fetching sales data:', error)
+          setData([])
+          setLoading(false)
+          return
+        }
+
+        // Process data by month
+        const monthlyData: { [key: string]: number } = {}
+        
+        records?.forEach(record => {
+          if (record.INV_DATE) {
+            const date = new Date(record.INV_DATE)
+            const month = date.toLocaleDateString('en-US', { month: 'long' })
+            const amount = parseFloat(record.TOTAL || '0') || 0
+            
+            if (monthlyData[month]) {
+              monthlyData[month] += amount
+            } else {
+              monthlyData[month] = amount
+            }
+          }
+        })
+
+        // Convert to array and sort by month
+        const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December']
+        
+        const processedData = monthOrder
+          .filter(month => monthlyData[month] > 0)
+          .map(month => ({
+            month,
+            amount: monthlyData[month] / 1000000 // Convert to millions
+          }))
+
+        setData(processedData)
+      } catch (error) {
+        console.error('Error processing sales data:', error)
+        setData([])
+      } finally {
+        setLoading(false)
       }
     }
 
-    // Prepare series data for each category
-    const series = categories.map(category => ({
-      name: category.name,
-      type: 'bar',
-      data: months.map(month => monthlyData[month as keyof typeof monthlyData][category.name as keyof typeof monthlyData[typeof month]] || 0),
-      itemStyle: {
-        color: category.color
-      }
-    }))
+    fetchData()
+  }, [filters])
+
+  useEffect(() => {
+    if (!chartRef.current || loading) return
+
+    const chart = echarts.init(chartRef.current)
+    
+    const months = data.map(item => item.month)
+    const amounts = data.map(item => item.amount)
 
     const option = {
       tooltip: {
         trigger: 'axis',
         axisPointer: {
-          type: 'shadow'
+          type: 'cross',
+          crossStyle: {
+            color: '#999'
+          }
         },
         formatter: function(params: any) {
-          let result = `<strong>${params[0].axisValue}</strong><br/>`
-          params.forEach((param: any) => {
-            if (param.value > 0) {
-              result += `${param.seriesName}: $${param.value}M<br/>`
-            }
-          })
-          return result
+          return `<strong>${params[0].axisValue}</strong><br/>Sales: $${params[0].value}M`
         }
-      },
-      legend: {
-        data: categories.map(cat => cat.name),
-        top: 10,
-        textStyle: {
-          fontSize: 10
-        },
-        itemWidth: 12,
-        itemHeight: 8
       },
       grid: {
         left: '3%',
         right: '4%',
         bottom: '3%',
-        top: '15%',
+        top: '3%',
         containLabel: true
       },
       xAxis: {
@@ -154,8 +145,7 @@ export default function SalesByYearChart({ filters }: SalesByYearChartProps) {
         data: months,
         axisLabel: {
           color: '#6b7280',
-          fontSize: 11,
-          rotate: 45
+          fontSize: 11
         },
         axisLine: {
           lineStyle: {
@@ -165,9 +155,9 @@ export default function SalesByYearChart({ filters }: SalesByYearChartProps) {
       },
       yAxis: {
         type: 'value',
-        name: 'Sales',
+        name: 'Sales (Millions)',
         nameLocation: 'middle',
-        nameGap: 50,
+        nameGap: 30,
         nameTextStyle: {
           color: '#6b7280',
           fontSize: 12,
@@ -177,7 +167,7 @@ export default function SalesByYearChart({ filters }: SalesByYearChartProps) {
           color: '#6b7280',
           fontSize: 11,
           formatter: function(value: number) {
-            return `${value}M`
+            return `$${value}M`
           }
         },
         axisLine: {
@@ -192,28 +182,39 @@ export default function SalesByYearChart({ filters }: SalesByYearChartProps) {
           }
         }
       },
-      series: series
+      series: [{
+        name: 'Sales',
+        type: 'bar',
+        data: amounts,
+        itemStyle: {
+          color: '#3b82f6'
+        },
+        emphasis: {
+          itemStyle: {
+            color: '#1d4ed8'
+          }
+        }
+      }]
     }
 
     chart.setOption(option)
 
-    const handleResize = () => {
-      chart.resize()
-    }
-
-    window.addEventListener('resize', handleResize)
-
     return () => {
-      window.removeEventListener('resize', handleResize)
       chart.dispose()
     }
+  }, [data, loading])
 
-  }, [filters])
+  if (loading) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center">
+        <div className="text-gray-500">Loading chart data...</div>
+      </div>
+    )
+  }
 
   return (
-    <div 
-      ref={chartRef} 
-      style={{ width: '100%', height: '100%' }}
-    />
+    <div className="w-full">
+      <div ref={chartRef} className="w-full h-96"></div>
+    </div>
   )
 }

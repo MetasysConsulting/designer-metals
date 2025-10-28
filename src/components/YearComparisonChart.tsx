@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as echarts from 'echarts'
+import { createClient } from '@supabase/supabase-js'
 
 interface YearComparisonChartProps {
   filters: {
@@ -11,52 +12,107 @@ interface YearComparisonChartProps {
   }
 }
 
+interface YearlyData {
+  year: string
+  amount: number
+}
+
 export default function YearComparisonChart({ filters }: YearComparisonChartProps) {
   const chartRef = useRef<HTMLDivElement>(null)
+  const [data, setData] = useState<YearlyData[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!chartRef.current) return
+    const fetchData = async () => {
+      setLoading(true)
+      
+      // Check if Supabase is configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+        console.warn('Supabase not configured, returning empty data for year comparison chart')
+        setData([])
+        setLoading(false)
+        return
+      }
+
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      )
+
+      try {
+        let query = supabase
+          .from('ARINV')
+          .select('TOTAL, INV_DATE, NAME, TREE_DESCR')
+          .not('TOTAL', 'is', null)
+          .not('INV_DATE', 'is', null)
+          .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+          .not('TREE_DESCR', 'eq', 'Shipped To')
+
+        // Apply filters
+        if (filters.customer && filters.customer !== 'All') {
+          query = query.eq('NAME', filters.customer)
+        }
+
+        if (filters.category && filters.category !== 'All') {
+          query = query.eq('TREE_DESCR', filters.category)
+        }
+
+        const { data: records, error } = await query
+
+        if (error) {
+          console.error('Error fetching year comparison data:', error)
+          setData([])
+          setLoading(false)
+          return
+        }
+
+        // Process data by year
+        const yearlyData: { [key: string]: number } = {}
+        
+        records?.forEach(record => {
+          if (record.INV_DATE) {
+            const date = new Date(record.INV_DATE)
+            const year = date.getFullYear().toString()
+            const amount = parseFloat(record.TOTAL || '0') || 0
+            
+            if (yearlyData[year]) {
+              yearlyData[year] += amount
+            } else {
+              yearlyData[year] = amount
+            }
+          }
+        })
+
+        // Convert to array and sort by year
+        const processedData = Object.keys(yearlyData)
+          .sort()
+          .map(year => ({
+            year,
+            amount: yearlyData[year] / 1000000 // Convert to millions
+          }))
+
+        setData(processedData)
+      } catch (error) {
+        console.error('Error processing year comparison data:', error)
+        setData([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [filters])
+
+  useEffect(() => {
+    if (!chartRef.current || loading) return
 
     const chart = echarts.init(chartRef.current)
     
-    // Sample data matching the Power BI report
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    
-    const years = [
-      { name: '2020', color: '#1f77b4' }, // Blue
-      { name: '2021', color: '#1e3a8a' }, // Dark Blue
-      { name: '2022', color: '#f97316' }, // Orange
-      { name: '2023', color: '#a855f7' }, // Purple
-      { name: '2024', color: '#ec4899' }, // Pink
-      { name: '2025', color: '#7c3aed' }   // Dark Purple
-    ]
+    const years = data.map(item => item.year)
+    const amounts = data.map(item => item.amount)
 
-    // Sample data for each month and year (in millions)
-    const monthlyData = {
-      '2020': [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
-      '2021': [0.05, 0.00, 0.04, 0.07, 0.06, 0.09, 0.06, 0.00, 0.01, 0.09, 0.00, 0.00],
-      '2022': [0.14, 0.22, 0.27, 0.13, 0.11, 0.16, 0.19, 0.20, 0.22, 0.26, 0.19, 0.28],
-      '2023': [0.55, 0.57, 0.48, 0.39, 0.22, 0.36, 0.54, 0.46, 0.45, 0.51, 0.57, 0.38],
-      '2024': [0.65, 0.57, 0.51, 0.60, 1.01, 0.72, 0.96, 0.93, 0.92, 0.71, 0.77, 0.82],
-      '2025': [0.79, 0.89, 1.22, 1.24, 1.46, 2.87, 1.46, 1.46, 1.46, 1.46, 1.46, 1.46]
-    }
-
-    // Prepare series data for each year
-    const series = years.map(year => ({
-      name: year.name,
-      type: 'line',
-      data: monthlyData[year.name as keyof typeof monthlyData],
-      itemStyle: {
-        color: year.color
-      },
-      lineStyle: {
-        color: year.color,
-        width: 2
-      },
-      symbol: 'circle',
-      symbolSize: 4,
-      smooth: false
-    }))
+    // Generate colors for each year
+    const colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
 
     const option = {
       tooltip: {
@@ -68,36 +124,22 @@ export default function YearComparisonChart({ filters }: YearComparisonChartProp
           }
         },
         formatter: function(params: any) {
-          let result = `<strong>${params[0].axisValue}</strong><br/>`
-          params.forEach((param: any) => {
-            result += `${param.seriesName}: $${param.value}M<br/>`
-          })
-          return result
+          return `<strong>${params[0].axisValue}</strong><br/>Sales: $${params[0].value}M`
         }
-      },
-      legend: {
-        data: years.map(year => year.name),
-        top: 10,
-        textStyle: {
-          fontSize: 12
-        },
-        itemWidth: 12,
-        itemHeight: 8
       },
       grid: {
         left: '3%',
         right: '4%',
         bottom: '3%',
-        top: '15%',
+        top: '3%',
         containLabel: true
       },
       xAxis: {
         type: 'category',
-        data: months,
+        data: years,
         axisLabel: {
           color: '#6b7280',
-          fontSize: 11,
-          rotate: 45
+          fontSize: 11
         },
         axisLine: {
           lineStyle: {
@@ -107,9 +149,9 @@ export default function YearComparisonChart({ filters }: YearComparisonChartProp
       },
       yAxis: {
         type: 'value',
-        name: 'Sales',
+        name: 'Sales (Millions)',
         nameLocation: 'middle',
-        nameGap: 50,
+        nameGap: 30,
         nameTextStyle: {
           color: '#6b7280',
           fontSize: 12,
@@ -119,7 +161,7 @@ export default function YearComparisonChart({ filters }: YearComparisonChartProp
           color: '#6b7280',
           fontSize: 11,
           formatter: function(value: number) {
-            return `${value}M`
+            return `$${value}M`
           }
         },
         axisLine: {
@@ -134,28 +176,41 @@ export default function YearComparisonChart({ filters }: YearComparisonChartProp
           }
         }
       },
-      series: series
+      series: [{
+        name: 'Sales',
+        type: 'bar',
+        data: amounts,
+        itemStyle: {
+          color: function(params: any) {
+            return colors[params.dataIndex % colors.length]
+          }
+        },
+        emphasis: {
+          itemStyle: {
+            opacity: 0.8
+          }
+        }
+      }]
     }
 
     chart.setOption(option)
 
-    const handleResize = () => {
-      chart.resize()
-    }
-
-    window.addEventListener('resize', handleResize)
-
     return () => {
-      window.removeEventListener('resize', handleResize)
       chart.dispose()
     }
+  }, [data, loading])
 
-  }, [filters])
+  if (loading) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center">
+        <div className="text-gray-500">Loading chart data...</div>
+      </div>
+    )
+  }
 
   return (
-    <div 
-      ref={chartRef} 
-      style={{ width: '100%', height: '100%' }}
-    />
+    <div className="w-full">
+      <div ref={chartRef} className="w-full h-96"></div>
+    </div>
   )
 }
