@@ -15,14 +15,12 @@ export default function ExportButtons({ pageName, onExportChart }: ExportButtons
 
   // Export Full Report - All pages to ONE PDF
   const handleFullReport = async () => {
-    console.log('Exporting full report with all pages to PDF...')
     await captureAllPagesAutomatically(router)
   }
 
   // Export Current Chart - Entire current page to PDF
   const handleExportChart = async () => {
     try {
-      console.log('Exporting current page to PDF...')
       
       // Hide buttons temporarily
       const buttons = document.querySelectorAll('button')

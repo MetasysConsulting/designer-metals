@@ -13,18 +13,15 @@ export default function SalesCategoryDetails() {
   // Sync filters from localStorage on mount
   useEffect(() => {
     const savedFilters = loadFilters()
-    console.log('Sales Category Details - Loading saved filters:', savedFilters)
     setFilters(savedFilters)
   }, [])
 
   const handleFiltersChange = useCallback((newFilters: any) => {
-    console.log('Sales Category Details - Filters updated:', newFilters)
     setFilters(newFilters)
   }, [])
 
   // Export functions
   const exportToImage = async () => {
-    console.log('Image export started')
     
     // Use visible dashboard content
     const targetElement = document.querySelector('.min-h-screen') as HTMLElement
@@ -34,7 +31,6 @@ export default function SalesCategoryDetails() {
     }
 
     try {
-      console.log('Starting html2canvas capture for image...')
       // Use html2canvas to capture the dashboard with better settings
       const canvas = await html2canvas(targetElement, {
         scale: 1.5,
@@ -55,7 +51,6 @@ export default function SalesCategoryDetails() {
         }
       })
       
-      console.log('Canvas created for image, dimensions:', canvas.width, 'x', canvas.height)
 
       // Convert to image and download
       const link = document.createElement('a')
@@ -63,7 +58,6 @@ export default function SalesCategoryDetails() {
       link.href = canvas.toDataURL('image/png', 0.9)
       link.click()
       
-      console.log('Image download triggered')
       
     } catch (error) {
       console.error('Image export failed:', error)

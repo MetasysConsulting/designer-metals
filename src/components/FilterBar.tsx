@@ -29,7 +29,6 @@ export default function FilterBar({ onFiltersChange }: { onFiltersChange: (filte
   // Sync with localStorage on mount
   useEffect(() => {
     const savedFilters = loadFilters()
-    console.log('FilterBar - Loading saved filters:', savedFilters)
     setSelectedYear(savedFilters.year || 'All')
     setSelectedCustomer(savedFilters.customer || 'All')
     setSelectedCategory(savedFilters.category || 'All')
