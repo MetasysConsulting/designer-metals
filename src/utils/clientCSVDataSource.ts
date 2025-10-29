@@ -132,9 +132,10 @@ export class ClientCSVDataSource {
     const data = await this.getData();
     
     return data.filter(record => {
-      // Exclude specific categories
-      if (record.TREE_DESCR === 'Employee Appreciation' || 
-          record.TREE_DESCR === 'Shipped To') {
+      // Exclude specific categories (case-insensitive)
+      const category = (record.TREE_DESCR || '').trim();
+      if (category.toLowerCase() === 'employee appreciation' || 
+          category.toLowerCase() === 'shipped to') {
         return false;
       }
       
@@ -178,6 +179,13 @@ export class ClientCSVDataSource {
     const dates: string[] = [];
     
     data.forEach(record => {
+      // Exclude specific categories (case-insensitive)
+      const category = (record.TREE_DESCR || '').trim();
+      if (category.toLowerCase() === 'employee appreciation' || 
+          category.toLowerCase() === 'shipped to') {
+        return; // Skip this record
+      }
+      
       const amount = parseFloat(record.TOTAL || '0') || 0;
       totalAmount += amount;
       
