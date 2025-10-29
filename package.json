@@ -1,0 +1,51 @@
+{
+  "name": "designer-metals",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@googlemaps/js-api-loader": "^2.0.1",
+    "@headlessui/react": "^2.2.9",
+    "@heroicons/react": "^2.2.0",
+    "@kinde-oss/kinde-auth-nextjs": "^2.9.2",
+    "@react-pdf/renderer": "^4.3.1",
+    "@supabase/supabase-js": "^2.58.0",
+    "@types/leaflet": "^1.9.21",
+    "@vercel/blob": "^2.0.0",
+    "brotli-wasm": "^3.0.1",
+    "csv-parse": "^6.1.0",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.2",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
+    "leaflet": "^1.9.4",
+    "lz-string": "^1.5.0",
+    "lz4js": "^0.2.0",
+    "next": "15.5.4",
+    "pako": "^2.1.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-leaflet": "^5.0.0",
+    "react-resizable-panels": "^3.0.6",
+    "react-to-print": "^3.1.1",
+    "zlib": "^1.0.5",
+    "zstd-wasm": "^0.0.9"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/pako": "^2.0.4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
