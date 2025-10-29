@@ -121,7 +121,6 @@ export async function fetchCategorySalesData(filters: any = {}): Promise<{ name:
     throw new Error(`Failed to fetch category sales data: ${error.message}`)
   }
 
-  console.log('Category sales data fetched successfully:', data?.length, 'records')
 
   // Group by TREE_DESCR and sum totals
   const categoryData: { [key: string]: number } = {}

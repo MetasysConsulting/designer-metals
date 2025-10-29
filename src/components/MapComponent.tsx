@@ -202,7 +202,6 @@ export default function MapComponent({ locationData, mode = 'bubbles', metric = 
         {/* Customer points layer */}
         {aggregation === 'customer' && (
           <>
-            {console.log('Rendering customer points:', customerPoints.length, customerPoints)}
             {customerPoints.map((p, idx) => (
               <Marker key={idx} position={[p.lat, p.lng]} icon={createCustomIcon(14, '#0ea5e9')}>
                 <Popup>

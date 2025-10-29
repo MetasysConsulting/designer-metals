@@ -59,7 +59,6 @@ export default function StackedBarChart({ filters }: { filters: any }) {
         throw new Error(`Failed to fetch stacked bar data: ${error.message}`)
       }
 
-      console.log('Stacked bar data fetched successfully:', rawData?.length, 'records')
 
       // Group by year and category
       const yearlyData: { [key: string]: { [key: string]: number } } = {}

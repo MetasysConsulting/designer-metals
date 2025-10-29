@@ -61,7 +61,6 @@ export default function CategoryDetailsTable({ filters }: { filters: any }) {
         throw new Error(`Failed to fetch category details: ${error.message}`)
       }
 
-      console.log('Category details data fetched successfully:', rawData?.length, 'records')
 
       // Group by category and month
       const categoryData: { [key: string]: { [key: string]: number } } = {}

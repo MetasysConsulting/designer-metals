@@ -35,6 +35,8 @@ export default function CategoryLineChart({ filters }: { filters: any }) {
         .select('TOTAL, INV_DATE')
         .not('TOTAL', 'is', null)
         .not('INV_DATE', 'is', null)
+        .not('TREE_DESCR', 'eq', 'Employee Appreciation')
+        .not('TREE_DESCR', 'eq', 'Shipped To')
 
       // Apply filters
       if (filters.year && filters.year !== 'All') {
@@ -56,7 +58,6 @@ export default function CategoryLineChart({ filters }: { filters: any }) {
         throw new Error(`Failed to fetch line chart data: ${error.message}`)
       }
 
-      console.log('Line chart data fetched successfully:', rawData?.length, 'records')
 
       // Group by year and sum totals
       const yearlyData: { [key: string]: number } = {}

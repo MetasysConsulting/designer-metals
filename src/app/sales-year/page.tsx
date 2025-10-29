@@ -10,18 +10,15 @@ export default function SalesByYear() {
 
   useEffect(() => {
     const savedFilters = loadFilters()
-    console.log('Sales by Year - Loading saved filters:', savedFilters)
     setFilters(savedFilters)
   }, [])
 
   const handleFiltersChange = useCallback((newFilters: any) => {
-    console.log('Sales by Year - Filters updated:', newFilters)
     setFilters(newFilters)
   }, [])
 
   // Export functions
   const exportToImage = async () => {
-    console.log('Image export started')
     
     const targetElement = document.querySelector('.min-h-screen') as HTMLElement
     if (!targetElement) {
@@ -30,7 +27,6 @@ export default function SalesByYear() {
     }
 
     try {
-      console.log('Starting html2canvas capture for image...')
       const canvas = await html2canvas(targetElement, {
         scale: 1.5,
         useCORS: true,
@@ -49,14 +45,12 @@ export default function SalesByYear() {
         }
       })
       
-      console.log('Canvas created for image, dimensions:', canvas.width, 'x', canvas.height)
 
       const link = document.createElement('a')
       link.download = `Designer-Metals-Sales-By-Year-${new Date().toISOString().split('T')[0]}.png`
       link.href = canvas.toDataURL('image/png', 0.9)
       link.click()
       
-      console.log('Image download triggered')
       
     } catch (error) {
       console.error('Image export failed:', error)

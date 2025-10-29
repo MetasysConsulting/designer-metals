@@ -101,7 +101,6 @@ export default function CustomerLocationMap({ filters }: CustomerLocationMapProp
   
   // Debug aggregation changes
   useEffect(() => {
-    console.log('Aggregation changed to:', aggregation)
   }, [aggregation])
   const [customerPoints, setCustomerPoints] = useState<CustomerPoint[]>([])
 
@@ -139,27 +138,21 @@ export default function CustomerLocationMap({ filters }: CustomerLocationMapProp
   useEffect(() => {
     const loadCustomerPoints = async () => {
       if (aggregation !== 'customer') {
-        console.log('Not customer aggregation, skipping geocoding')
         return
       }
-      console.log('Loading customer points with filters:', filters)
       try {
         const res = await fetch('/api/geocode-customers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(filters)
         })
-        console.log('Geocoding API response status:', res.status)
         if (res.ok) {
           const pts = await res.json()
-          console.log('Customer points fetched:', pts.length, pts)
           setCustomerPoints(pts)
         } else {
-          console.log('Failed to fetch customer points:', res.status, await res.text())
           setCustomerPoints([])
         }
       } catch (error) {
-        console.log('Error fetching customer points:', error)
         setCustomerPoints([])
       }
     }
@@ -191,14 +184,12 @@ export default function CustomerLocationMap({ filters }: CustomerLocationMapProp
           <div className="flex items-center gap-1 bg-gray-100 rounded p-1">
             <button
               onClick={() => {
-                console.log('Clicked By State button')
                 setAggregation('state')
               }}
               className={`px-2 py-1 text-xs rounded ${aggregation==='state' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white'}`}
             >By State</button>
             <button
               onClick={() => {
-                console.log('Clicked Per Customer button')
                 setAggregation('customer')
               }}
               className={`px-2 py-1 text-xs rounded ${aggregation==='customer' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-white'}`}

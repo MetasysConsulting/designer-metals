@@ -46,8 +46,6 @@ export async function POST(request: NextRequest) {
 
     // If Supabase is not configured, we can still geocode live (no cache)
     const supabaseConfigured = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co')
-    console.log('Supabase configured:', supabaseConfigured)
-    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
 
     // Pull unique customers with full address info
     let query = supabase
@@ -75,10 +73,7 @@ export async function POST(request: NextRequest) {
       console.error('ARINV fetch failed for geocoding:', error)
       return NextResponse.json([])
     }
-    console.log('Raw database data:', data?.length || 0, 'rows')
-
     const rows = (data || []).filter(r => r.CITY && r.STATE)
-    console.log('Found rows for geocoding:', rows.length)
 
     // Aggregate per customer with full address
     const byCustomer: Map<string, { name: string; address: string; city: string; state: string; zip: string; totalSales: number }> = new Map()
@@ -97,7 +92,6 @@ export async function POST(request: NextRequest) {
       else byCustomer.set(key, { name, address: fullAddress, city, state, zip, totalSales: total })
     }
     
-    console.log('Aggregated customers:', byCustomer.size)
 
     const results: CustomerPoint[] = []
     const pendingToGeocode: { key: string; name: string; address: string; city: string; state: string; zip: string; totalSales: number }[] = []
@@ -170,7 +164,6 @@ export async function POST(request: NextRequest) {
       if (i < pendingToGeocode.length - 1) await new Promise(r => setTimeout(r, 1100))
     }
 
-    console.log('Returning geocoded results:', results.length)
     return NextResponse.json(results)
   } catch (e) {
     console.error('Geocode customers API failed:', e)

@@ -1,17 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Production-ready configuration
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
+    // Enable ESLint during builds for production quality
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
-    ignoreBuildErrors: true,
+    // Enable TypeScript checking during builds
+    ignoreBuildErrors: false,
   },
+  // Optimize for production
+  swcMinify: true,
+  compress: true,
+  poweredByHeader: false,
 }
 
 module.exports = nextConfig
